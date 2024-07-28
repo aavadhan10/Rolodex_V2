@@ -24,7 +24,7 @@ def load_data(file_path):
 @st.cache(allow_output_mutation=True)
 def vectorize_data(data):
     vectorizer = TfidfVectorizer()
-    X = vectorizer.fit_transform(data['Matter_Number'].astype(str))
+    X = vectorizer.fit_transform(data['Matter Number'].astype(str))
     X = normalize(X)
     return X, vectorizer
 
@@ -40,19 +40,19 @@ def query_gpt_with_data(question, data, X, vectorizer, message):
         if relevant_data.empty:
             return "No relevant data found."
 
-        if "contact" in question.lower():
-            return relevant_data.to_dict(orient='records')
-        else:
-            prompt = f"Given the following data on top lawyers:\n{relevant_data.to_string(index=False)}\n{message} {practice_area}?"
-            response = openai.ChatCompletion.create(
-                model="gpt-4",
-                messages=[
-                    {"role": "system", "content": "You are an AI assistant helping to identify top lawyers for specific cases at a law firm based on data in a csv file given to you (Matters_Bio). Recommend a top lawyer based on all the information in the file. Don't lie. Return the information in a table format (lawyer name, practice group, area of expertise, related case, and contact). The lawyer's contact info is in the column 'contact', please provide their work email and phone number."},
-                    {"role": "user", "content": prompt}
-                ],
-                max_tokens=150
-            )
-            return response.choices[0]['message']['content'].strip()
+        # Ensure the column names are exactly as in the provided CSV file
+        prompt_data = relevant_data[['Attorney Name', 'Practice Group', 'Area of Expertise', 'Matter Description', 'Contact']]
+
+        prompt = f"Given the following data on top lawyers:\n{prompt_data.to_string(index=False)}\n{message} {practice_area}?"
+        response = openai.ChatCompletion.create(
+            model="gpt-4",
+            messages=[
+                {"role": "system", "content": "You are an AI assistant helping to identify top lawyers for specific cases at a law firm based on data in a csv file given to you (Matters_Bio). Recommend a top lawyer based on all the information in the file. Don't lie. Return the information in a table format (lawyer name, practice group, area of expertise, related case, and contact). The lawyer's contact info is in the column 'Contact', please provide their work email and phone number."},
+                {"role": "user", "content": prompt}
+            ],
+            max_tokens=150
+        )
+        return response.choices[0]['message']['content'].strip()
     except Exception as e:
         st.error(f"Error querying GPT: {e}")
         return None
@@ -70,13 +70,13 @@ st.write("Ask questions about the top lawyers in a specific practice area at Sca
 user_input = st.text_input("Your question:", placeholder="e.g., 'Who are the top lawyers for corporate law?'")
 
 if user_input:
-    data = load_data('Matter_Bio.csv')
+    data = load_data('/mnt/data/Matter_Bio.csv')
     
     # Print the column names to verify
     st.write("Columns in the CSV file:", data.columns.tolist())
     
     # Validate data
-    required_columns = ['Attorney Name', 'Practice_Group', 'Area_ of_ Expertise', 'Matter_Description', 'Contact']
+    required_columns = ['Attorney Name', 'Practice Group', 'Area of Expertise', 'Matter Description', 'Contact']
     if not all(column in data.columns for column in required_columns):
         st.error("The CSV file does not contain all the required columns.")
     elif data[required_columns].isnull().any().any():
