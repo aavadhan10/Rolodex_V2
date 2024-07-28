@@ -8,6 +8,9 @@ from dotenv import load_dotenv
 # Load environment variables
 load_dotenv()
 
+# Load environment variables
+load_dotenv()
+
 # Initialize OpenAI API using environment variable
 openai.api_key = st.secrets["OPENAI_API_KEY"]
 
