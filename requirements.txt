@@ -1,0 +1,6 @@
+openai==0.28 
+faiss-cpu==1.8.0
+scikit-learn==1.5.1
+streamlit==1.36.0
+numpy<=1.25.1
+python-dotenv==0.10.1
