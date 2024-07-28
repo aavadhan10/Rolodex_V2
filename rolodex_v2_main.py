@@ -60,7 +60,7 @@ def display_response_in_table(response):
         st.write(response)
 
 # Streamlit app layout
-st.title("Rolodex AI: Find Your Ideal Lawyer 👨‍⚖️ Utilizing Open AI GPT 4 LLM's")
+st.title("Rolodex AI: Find Your Ideal Lawyer 👨‍⚖️ Utilizing Open AI GPT 4 LLM's V2 Playground Version")
 st.write("Ask questions about the top lawyers in a specific practice area at Scale LLP:")
 user_input = st.text_input("Your question:", placeholder="e.g., 'Who are the top lawyers for corporate law?'")
 
