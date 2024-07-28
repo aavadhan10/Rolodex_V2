@@ -5,8 +5,6 @@ import faiss
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.preprocessing import normalize
 from dotenv import load_dotenv
-# Load environment variables
-load_dotenv()
 
 # Load environment variables
 load_dotenv()
@@ -36,10 +34,13 @@ def query_gpt_with_data(question, data, X, vectorizer, message):
         indices = D.argsort()[-5:][::-1]
         relevant_data = data.iloc[indices]
 
+        if relevant_data.empty:
+            return "No relevant data found."
+
         if "contact" in question.lower():
             return relevant_data.to_dict(orient='records')
         else:
-            prompt = f"Given the following data on top lawyers:\n{relevant_data.to_string()}\n{message} {practice_area}?"
+            prompt = f"Given the following data on top lawyers:\n{relevant_data.to_string(index=False)}\n{message} {practice_area}?"
             response = openai.ChatCompletion.create(
                 model="gpt-4",
                 messages=[
@@ -66,8 +67,15 @@ st.write("Ask questions about the top lawyers in a specific practice area at Sca
 user_input = st.text_input("Your question:", placeholder="e.g., 'Who are the top lawyers for corporate law?'")
 
 if user_input:
-    data = load_data('Matter_Bio.csv')
-    if not data.empty:
+    data = load_data('/mnt/data/Matter_Bio.csv')
+    
+    # Validate data
+    required_columns = ['Attorney Name', 'Practice Group', 'Area of Expertise','Contact']
+    if not all(column in data.columns for column in required_columns):
+        st.error("The CSV file does not contain all the required columns.")
+    elif data[required_columns].isnull().any().any():
+        st.error("The CSV file contains missing values in the required columns.")
+    else:
         X, vectorizer = vectorize_data(data)
         message = "Please provide the top lawyers for the practice area of"
         answer = query_gpt_with_data(user_input, data, X, vectorizer, message)
@@ -77,5 +85,3 @@ if user_input:
             st.write("Answer:", answer)
         else:
             st.error("Failed to retrieve an answer. Please check your input.")
-    else:
-        st.error("Failed to load data.")
