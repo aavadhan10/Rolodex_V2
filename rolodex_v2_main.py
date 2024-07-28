@@ -1,4 +1,4 @@
-import openai
+ import openai
 import streamlit as st
 import pandas as pd
 import faiss
@@ -70,7 +70,7 @@ st.write("Ask questions about the top lawyers in a specific practice area at Sca
 user_input = st.text_input("Your question:", placeholder="e.g., 'Who are the top lawyers for corporate law?'")
 
 if user_input:
-    data = load_data('/mnt/data/Matter_Bio.csv')
+    data = load_data('Matter_Bio.csv')
     
     # Print the column names to verify
     st.write("Columns in the CSV file:", data.columns.tolist())
