@@ -70,7 +70,7 @@ if user_input:
     data = load_data('Matter_Bio.csv')
     
     # Validate data
-    required_columns = ['Attorney Name', 'Practice Group', 'Area of Expertise','Contact']
+    required_columns = ['Attorney Name', 'Practice Group', 'Area of Expertise', 'Matter Description', 'Contact']
     if not all(column in data.columns for column in required_columns):
         st.error("The CSV file does not contain all the required columns.")
     elif data[required_columns].isnull().any().any():
