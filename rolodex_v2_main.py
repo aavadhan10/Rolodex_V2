@@ -42,7 +42,7 @@ def query_gpt_with_data(question, data, index, vectorizer, message):
             response = openai.ChatCompletion.create(
                 model="gpt-4",
                 messages=[
-                    {"role": "system", "content": "You are an assistant helping to identify top lawyers. Return recommendations in a table with lawyer name, contact, practice group and relative cases"},
+                    {"role": "system", "content": "You are an assistant helping to identify top lawyers. Return recommendations in a table with lawyer name, contact, practice group and relevant cases."},
                     {"role": "user", "content": prompt}
                 ],
                 max_tokens=150
@@ -71,10 +71,8 @@ if user_input:
         if index is not None and vectorizer is not None:
             message = "Please provide the top lawyers for the practice area of"
             answer = query_gpt_with_data(user_input, data, index, vectorizer, message)
-            if isinstance(answer, list):
-                st.table(answer)
-            elif answer:
-                st.write("Answer:", answer)
+            if answer:
+                display_response_in_table(answer)
             else:
                 st.error("Failed to retrieve an answer. Please check your input.")
     else:
