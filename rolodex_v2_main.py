@@ -21,7 +21,7 @@ def load_data(file_path):
 @st.cache(allow_output_mutation=True)
 def create_vector_db(data):
     vectorizer = TfidfVectorizer()
-    X = vectorizer.fit_transform(data['Responsible Attorney'].astype(str))  # Use relevant data column
+    X = vectorizer.fit_transform(data['Matter Number'].astype(str))  # Use relevant data column
     X = normalize(X)
     index = faiss.IndexFlatL2(X.shape[1])
     index.add(X.toarray())
