@@ -42,7 +42,7 @@ def query_gpt_with_data(question, data, index, vectorizer, message):
             response = openai.ChatCompletion.create(
                 model="gpt-4",
                 messages=[
-                    {"role": "system", "content": "You are an AI assistant helping to identify top lawyers for specific cases at a law firm based on data in a csv file given to you (Matters_Bio). Recommend a top lawyer based on all the information in the file. Dont lie. Return the information in a table format (lawyer name practice group, area of expertise, related case and contact "},
+                    {"role": "system", "content": "You are an AI assistant helping to identify top lawyers for specific cases at a law firm based on data in a csv file given to you (Matters_Bio). Recommend a top lawyer based on all the information in the file. Dont lie. Return the information in a table format (lawyer name practice group, area of expertise, related case and contact. The lawyers contact info is in the column "contact", please provide their work email and phone number "},
                     {"role": "user", "content": prompt}
                 ],
                 max_tokens=150
