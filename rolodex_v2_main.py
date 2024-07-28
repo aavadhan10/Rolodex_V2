@@ -5,7 +5,6 @@ import faiss
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.preprocessing import normalize
 from dotenv import load_dotenv
-
 # Load environment variables
 load_dotenv()
 
@@ -17,15 +16,27 @@ openai.api_key = st.secrets["OPENAI_API_KEY"]
 def load_data(file_path):
     return pd.read_csv(file_path)
 
-# Function to query GPT with context from CSV data
-def query_gpt_with_data(question, data, message):
+# Create vector representation of the data
+@st.cache(allow_output_mutation=True)
+def vectorize_data(data):
+    vectorizer = TfidfVectorizer()
+    X = vectorizer.fit_transform(data['Matter Number'].astype(str))
+    X = normalize(X)
+    return X, vectorizer
+
+# Function to query GPT with context from vectorized data
+def query_gpt_with_data(question, data, X, vectorizer, message):
     try:
-        relevant_data = data
+        practice_area = question.split("for")[-1].strip()
+        practice_area_vec = vectorizer.transform([practice_area])
+        D = (X @ practice_area_vec.T).toarray().ravel()
+        indices = D.argsort()[-5:][::-1]
+        relevant_data = data.iloc[indices]
 
         if "contact" in question.lower():
             return relevant_data.to_dict(orient='records')
         else:
-            prompt = f"Given the following data on top lawyers:\n{relevant_data.to_string()}\n{message}?"
+            prompt = f"Given the following data on top lawyers:\n{relevant_data.to_string()}\n{message} {practice_area}?"
             response = openai.ChatCompletion.create(
                 model="gpt-4",
                 messages=[
@@ -54,8 +65,9 @@ user_input = st.text_input("Your question:", placeholder="e.g., 'Who are the top
 if user_input:
     data = load_data('Matter_Bio.csv')
     if not data.empty:
-        message = "Please provide the top lawyers for the practice area"
-        answer = query_gpt_with_data(user_input, data, message)
+        X, vectorizer = vectorize_data(data)
+        message = "Please provide the top lawyers for the practice area of"
+        answer = query_gpt_with_data(user_input, data, X, vectorizer, message)
         if isinstance(answer, list):
             st.table(answer)
         elif answer:
