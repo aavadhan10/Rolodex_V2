@@ -15,7 +15,10 @@ openai.api_key = st.secrets["OPENAI_API_KEY"]
 # Load CSV data
 @st.cache_data
 def load_data(file_path):
-    return pd.read_csv(file_path)
+    data = pd.read_csv(file_path)
+    # Trim spaces from column names
+    data.columns = data.columns.str.strip()
+    return data
 
 # Create vector representation of the data
 @st.cache(allow_output_mutation=True)
@@ -67,7 +70,7 @@ st.write("Ask questions about the top lawyers in a specific practice area at Sca
 user_input = st.text_input("Your question:", placeholder="e.g., 'Who are the top lawyers for corporate law?'")
 
 if user_input:
-    data = load_data('Matter_Bio.csv')
+    data = load_data('/mnt/data/Matter_Bio.csv')
     
     # Validate data
     required_columns = ['Attorney Name', 'Practice Group', 'Area of Expertise', 'Matter Description', 'Contact']
