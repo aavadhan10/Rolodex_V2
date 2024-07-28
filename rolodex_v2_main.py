@@ -35,7 +35,7 @@ def query_gpt_with_data(question, data, index, vectorizer, message):
         D, I = index.search(normalize(practice_area_vec).toarray(), k=5)
         relevant_data = data.iloc[I[0]]
 
-        if "contact information" in question.lower():
+        if "contact" in question.lower():
             return relevant_data.to_dict(orient='records')
         else:
             prompt = f"Given the following data on top lawyers:\n{relevant_data.to_string()}\n{message} {practice_area}?"
