@@ -24,7 +24,7 @@ def load_data(file_path):
 @st.cache(allow_output_mutation=True)
 def vectorize_data(data):
     vectorizer = TfidfVectorizer()
-    X = vectorizer.fit_transform(data['Matter Number'].astype(str))
+    X = vectorizer.fit_transform(data['Matter_Number'].astype(str))
     X = normalize(X)
     return X, vectorizer
 
@@ -70,10 +70,13 @@ st.write("Ask questions about the top lawyers in a specific practice area at Sca
 user_input = st.text_input("Your question:", placeholder="e.g., 'Who are the top lawyers for corporate law?'")
 
 if user_input:
-    data = load_data('Matter_Bio.csv')
+    data = load_data('/mnt/data/Matter_Bio.csv')
+    
+    # Print the column names to verify
+    st.write("Columns in the CSV file:", data.columns.tolist())
     
     # Validate data
-    required_columns = ['Attorney_Name', 'Practice_Group', 'Area_of_Expertise', 'Matter_Description', 'Contact']
+    required_columns = ['Attorney Name', 'Practice_Group', 'Area_ of_ Expertise', 'Matter_Description', 'Contact']
     if not all(column in data.columns for column in required_columns):
         st.error("The CSV file does not contain all the required columns.")
     elif data[required_columns].isnull().any().any():
