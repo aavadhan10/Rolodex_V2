@@ -68,9 +68,8 @@ def query_gpt_with_data(question, matters_data, matters_index, matters_vectorize
 
 # Function to display the response in a table format
 def display_response_in_table(response):
-    if isinstance(response, list):
-        df = pd.DataFrame(response)
-        st.table(df[['Attorney', 'Matter Description', 'Work Email', 'Work Phone']])
+    if isinstance(response, pd.DataFrame):
+        st.table(response)
     else:
         st.write(response)
 
@@ -89,7 +88,7 @@ if user_input:
         
         if matters_index is not None:
             answer = query_gpt_with_data(user_input, matters_data, matters_index, matters_vectorizer)
-            if answer:
+            if answer is not None:
                 display_response_in_table(answer)
             else:
                 st.error("Failed to retrieve an answer. Please check your input.")
