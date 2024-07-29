@@ -94,7 +94,7 @@ def query_gpt_with_data(question, matters_data, matters_index, matters_vectorize
         # Prepare the prompt for GPT-4
         context = combined_results.to_string(index=False)
         messages = [
-            {"role": "system", "content": "You are a helpful assistant."},
+            {"role": "system", "content": "You are a helpful assistant. I want you to go through the csv files and make a recommendation based on the type of case, matter, and the attorney background. Don't make any information up."},
             {"role": "user", "content": f"Based on the following information, please make a recommendation:\n\n{context}\n\nRecommendation:"}
         ]
         
