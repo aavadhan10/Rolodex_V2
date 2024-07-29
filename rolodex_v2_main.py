@@ -77,20 +77,3 @@ def display_response_in_table(response):
 st.title("Rolodex AI: Find Your Ideal Lawyer 👨‍⚖️ Utilizing Open AI GPT 4 LLM's V2 Playground Version")
 st.write("Ask questions about the top lawyers in a specific practice area at Scale LLP:")
 user_input = st.text_input("Your question:", placeholder="e.g., 'Who are the top lawyers for corporate law?'")
-
-if user_input:
-    # Load CSV data on the backend
-    matters_data = load_and_clean_data('Matters.csv', encoding='latin1')  # Ensure correct file path and encoding
-    
-    if not matters_data.empty:
-        # Ensure the correct column names are used
-        matters_index, matters_vectorizer = create_vector_db(matters_data, ['Attorney', 'Practice Area', 'Matter Description'])  # Adjusted columns
-        
-        if matters_index is not None:
-            answer = query_gpt_with_data(user_input, matters_data, matters_index, matters_vectorizer)
-            if answer is not None:
-                display_response_in_table(answer)
-            else:
-                st.error("Failed to retrieve an answer. Please check your input.")
-    else:
-        st.error("Failed to load data.")
