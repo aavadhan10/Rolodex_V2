@@ -6,7 +6,6 @@ from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.preprocessing import normalize
 from dotenv import load_dotenv
 
-
 # Load environment variables
 load_dotenv()
 
@@ -21,7 +20,7 @@ def load_and_clean_data(file_path, encoding='utf-8'):
     data = data.loc[:, ~data.columns.str.contains('^Unnamed')]  # Remove unnamed columns
     return data
 
-# Create vector database for a given dataframe and columns
+# Create vector database for a given dataframe and column
 @st.cache(allow_output_mutation=True)
 def create_vector_db(data, columns):
     combined_text = data[columns].fillna('').apply(lambda x: ' '.join(x.astype(str)), axis=1)
@@ -33,52 +32,46 @@ def create_vector_db(data, columns):
     return index, vectorizer
 
 # Function to query GPT with context from vector DB
-def query_gpt_with_data(question, matters_data, users_data, matters_index, users_index, matters_vectorizer, users_vectorizer, num_recommendations=3):
+def query_gpt_with_data(question, matters_data, users_data, matters_index, users_index, matters_vectorizer, users_vectorizer):
     try:
         practice_area = question.split("for")[-1].strip()
         practice_area_vec_matters = matters_vectorizer.transform([practice_area])
         practice_area_vec_users = users_vectorizer.transform([practice_area])
         
-        D_matters, I_matters = matters_index.search(normalize(practice_area_vec_matters).toarray(), k=num_recommendations)
-        D_users, I_users = users_index.search(normalize(practice_area_vec_users).toarray(), k=num_recommendations)
+        D_matters, I_matters = matters_index.search(normalize(practice_area_vec_matters).toarray(), k=5)
+        D_users, I_users = users_index.search(normalize(practice_area_vec_users).toarray(), k=5)
         
-        relevant_matters_data = matters_data.iloc[I_matters.flatten()]
-        relevant_users_data = users_data.iloc[I_users.flatten()]
+        relevant_matters_data = matters_data.iloc[I_matters[0]]
+        relevant_users_data = users_data.iloc[I_users[0]]
 
         # Merge data based on Attorney Name
         combined_data = relevant_matters_data.merge(relevant_users_data, left_on='Attorney', right_on='Attorney Name', how='left')
 
-        # Construct the prompt for GPT-4
-        prompt = f"""
-        Based on the following data about top lawyers:
+        # Debugging: Display the combined data
+        st.write("Combined Data for Debugging:")
+        st.write(combined_data)
 
-        {combined_data.to_string(index=False)}
-
-        Please provide the top {num_recommendations} lawyers for the practice area of {practice_area}.
-        Include their names, work emails, work phones, and relevant cases.
-        """
-
-        # Call the OpenAI GPT-4 model
-        response = openai.ChatCompletion.create(
-            model="gpt-4",
-            messages=[
-                {"role": "system", "content": "You are an assistant helping to identify top lawyers. Return recommendations in a table with lawyer name, work email, work phone, and relevant cases. You need to return the lawyer name, relevant cases, work email and workphone. All of this infomation is in matters.csv and users.csv. Do not make up numbers. Parse through the csv files"},
-                {"role": "user", "content": prompt}
-            ],
-            max_tokens=150
-        )
-
-        gpt_output = response.choices[0].message['content'].strip()
-        
-        return gpt_output
+        if "contact information" in question.lower():
+            return combined_data[['Attorney', 'Work Email', 'Work Phone']].to_dict(orient='records')
+        else:
+            prompt = f"Given the following data on top lawyers:\n{combined_data.to_string()}\nPlease provide the top lawyers for the practice area of {practice_area}."
+            response = openai.ChatCompletion.create(
+                model="gpt-4",
+                messages=[
+                    {"role": "system", "content": "You are an assistant helping to identify top lawyers. Return recommendations in a table with lawyer name, work email and work phone, and relevant cases. You can find the work email and work phone in the Users.CSV. Return that information from users.csv in that table. Before,parse through the matters csv file to make a decision about whihc lawyers are the best. Then you can match the best lawyers and return their contact information.  Run through this file for this information.. Often times the practice group may not actually reflect the actual law case so parse through all the csv files before recommending a lawyer. Make sure you go through all the information each csv and return out relevant cases from the matters csv but make sure you output the information for lawyer contact and name from users.csv. Return the lawyers work email and work phone in the users.csv file."},
+                    {"role": "user", "content": prompt}
+                ],
+                max_tokens=150
+            )
+            return response.choices[0]['message']['content'].strip()
     except Exception as e:
         st.error(f"Error querying GPT: {e}")
         return None
 
 # Function to display the response in a table format
 def display_response_in_table(response):
-    if isinstance(response, str):
-        st.markdown(response, unsafe_allow_html=True)
+    if isinstance(response, list):
+        st.table(response)
     else:
         st.write(response)
 
@@ -97,7 +90,7 @@ if user_input:
         users_index, users_vectorizer = create_vector_db(users_data, ['Role', 'Practice Group', 'Practice Description', 'Area of Expertise'])  # Adjusted columns
         
         if matters_index is not None and users_index is not None:
-            answer = query_gpt_with_data(user_input, matters_data, users_data, matters_index, users_index, matters_vectorizer, users_vectorizer, num_recommendations=3)
+            answer = query_gpt_with_data(user_input, matters_data, users_data, matters_index, users_index, matters_vectorizer, users_vectorizer)
             if answer:
                 display_response_in_table(answer)
             else:
