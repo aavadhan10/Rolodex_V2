@@ -48,10 +48,7 @@ def query_gpt_with_data(question, matters_data, users_data, matters_index, users
         # Merge data based on Attorney Name
         combined_data = relevant_matters_data.merge(relevant_users_data, left_on='Attorney', right_on='Attorney Name', how='left')
 
-        # Debugging: Display the combined data
-        st.write("Combined Data for Debugging:")
-        st.write(combined_data)
-
+        # Construct the output data
         output_data = combined_data[['Attorney', 'Work Email', 'Work Phone', 'Matter Description']]
         output_data = output_data.rename(columns={'Attorney': 'Lawyer Name', 'Matter Description': 'Relevant Cases'})
 
