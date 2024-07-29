@@ -48,19 +48,37 @@ def query_gpt_with_data(question, matters_data, users_data, matters_index, users
         # Merge data based on Attorney Name
         combined_data = relevant_matters_data.merge(relevant_users_data, left_on='Attorney', right_on='Attorney Name', how='left')
 
-        # Construct the output data
-        output_data = combined_data[['Attorney', 'Work Email', 'Work Phone', 'Matter Description']]
-        output_data = output_data.rename(columns={'Attorney': 'Lawyer Name', 'Matter Description': 'Relevant Cases'})
+        # Construct the prompt for GPT-4
+        prompt = f"""
+        Based on the following data about top lawyers:
 
-        return output_data.head(num_recommendations).to_dict(orient='records')
+        {combined_data.to_string(index=False)}
+
+        Please provide the top {num_recommendations} lawyers for the practice area of {practice_area}.
+        Include their names, work emails, work phones, and relevant cases.
+        """
+
+        # Call the OpenAI GPT-4 model
+        response = openai.ChatCompletion.create(
+            model="gpt-4",
+            messages=[
+                {"role": "system", "content": "You are an assistant helping to identify top lawyers. Return recommendations in a table with lawyer name, work email, work phone, and relevant cases."},
+                {"role": "user", "content": prompt}
+            ],
+            max_tokens=150
+        )
+
+        gpt_output = response.choices[0].message['content'].strip()
+        
+        return gpt_output
     except Exception as e:
         st.error(f"Error querying GPT: {e}")
         return None
 
 # Function to display the response in a table format
 def display_response_in_table(response):
-    if isinstance(response, list):
-        st.table(response)
+    if isinstance(response, str):
+        st.markdown(response, unsafe_allow_html=True)
     else:
         st.write(response)
 
