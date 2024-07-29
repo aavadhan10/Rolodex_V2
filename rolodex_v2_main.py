@@ -65,11 +65,20 @@ def query_gpt_with_data(question, matters_data, matters_index, matters_vectorize
         
         # Call GPT-4 for a recommendation
         gpt_response = call_gpt(messages)
-        
+
+        # Process the GPT-4 response to extract recommendations
+        recommendations = []
+        for line in gpt_response.split('\n'):
+            if line.strip():
+                recommendations.append(line.strip())
+
+        # Convert recommendations into a DataFrame
+        recommendations_df = pd.DataFrame(recommendations, columns=['Recommendation'])
+
         st.write("Top Recommended Lawyers Based on Filtered Data:")
         st.write(filtered_data)
-        st.write("GPT-4 Recommendation:")
-        st.write(gpt_response)
+        st.write("GPT-4 Recommendations:")
+        st.table(recommendations_df)
     except Exception as e:
         st.error(f"Error querying GPT: {e}")
 
