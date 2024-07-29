@@ -48,33 +48,30 @@ def query_gpt_with_data(question, matters_data, matters_index, matters_vectorize
         st.write("Filtered Data for Debugging:")
         st.write(filtered_data)
 
-        # Find lawyers with complete information
+        # Find the top 1-3 lawyers with complete information and best vector match
         complete_lawyers = filtered_data.dropna(subset=['Attorney', 'Work Email', 'Work Phone'])
+        top_complete_lawyers = complete_lawyers.head(3)
 
-        if complete_lawyers.empty:
+        if top_complete_lawyers.empty:
             st.write("No recommended lawyers found with complete information.")
         else:
-            # Select the best matched lawyer based on vector distance
-            best_match_idx = D[0].argmin()
-            best_matched_lawyer = relevant_data.iloc[best_match_idx]
+            top_complete_lawyers = top_complete_lawyers.rename(columns={'Attorney': 'Attorney Name'})
+            st.write("Top 1-3 Recommended Lawyer(s) (Best Vector Match with Complete Information):")
+            st.write(top_complete_lawyers[['Attorney Name', 'Work Email', 'Work Phone']])
 
-            if not pd.isna(best_matched_lawyer['Work Email']) and not pd.isna(best_matched_lawyer['Work Phone']):
-                best_matched_lawyer = best_matched_lawyer[['Attorney', 'Work Email', 'Work Phone']]
-                st.write("Most Recommended Lawyer + Contact Information (Best Vector Match):")
-                st.write(best_matched_lawyer)
-            else:
-                most_recommended_lawyers = complete_lawyers.head(3)
-                most_recommended_lawyers = most_recommended_lawyers.rename(columns={'Attorney': 'Attorney Name'})
-                st.write("Most Recommended Lawyer(s):")
-                st.write(most_recommended_lawyers[['Attorney Name', 'Work Email', 'Work Phone', 'Relevant Matters']])
+        # Display the most relevant case
+        most_relevant_case = relevant_data.iloc[D[0].argmin()]
+        st.write("Most Relevant Case:")
+        st.write(most_relevant_case[['Practice Area', 'Matter Description']])
+        st.write("Relevant Matters:")
+        st.write(relevant_data[['Matter Description']])
 
     except Exception as e:
         st.error(f"Error querying GPT: {e}")
 
 # Streamlit app layout
-st.title("Rolodex AI: Find Your Ideal Lawyer 👨‍⚖️ Utilizing Open AI GPT 4 LLM's V2 ")
+st.title("Rolodex AI: Find Your Ideal Lawyer 👨‍⚖️ Utilizing Open AI GPT 4 LLM's V2 Playground Version")
 st.write("Ask questions about the top lawyers in a specific practice area at Scale LLP:")
-st.write("Note this is still a prototype and can make mistakes. Check important info.:")
 user_input = st.text_input("Your question:", placeholder="e.g., 'Who are the top lawyers for corporate law?'")
 
 if user_input:
