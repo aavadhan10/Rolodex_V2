@@ -78,8 +78,7 @@ if user_input:
     matters_data = load_and_clean_data('Matters.csv', encoding='latin1')  # Try 'latin1' encoding if 'utf-8' fails
     users_data = load_and_clean_data('Users.csv', encoding='latin1')      # Try 'latin1' encoding if 'utf-8' fails
     
-    st.write("Matters Data Columns:", matters_data.columns.tolist())
-    st.write("Users Data Columns:", users_data.columns.tolist())
+    # Removed the column names print statements
     
     if not matters_data.empty and not users_data.empty:
         # Ensure the correct column names are used
