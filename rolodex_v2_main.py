@@ -6,6 +6,7 @@ from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.preprocessing import normalize
 from dotenv import load_dotenv
 
+
 # Load environment variables
 load_dotenv()
 
@@ -20,7 +21,7 @@ def load_and_clean_data(file_path, encoding='utf-8'):
     data = data.loc[:, ~data.columns.str.contains('^Unnamed')]  # Remove unnamed columns
     return data
 
-# Create vector database for a given dataframe and column
+# Create vector database for a given dataframe and columns
 @st.cache(allow_output_mutation=True)
 def create_vector_db(data, columns):
     combined_text = data[columns].fillna('').apply(lambda x: ' '.join(x.astype(str)), axis=1)
@@ -78,7 +79,7 @@ if user_input:
     
     if not matters_data.empty:
         # Ensure the correct column names are used
-        matters_index, matters_vectorizer = create_vector_db(matters_data, ['Attorney', 'Practice Area', 'Matter Description'])  # Adjusted columns
+        matters_index, matters_vectorizer = create_vector_db(matters_data, ['Practice Area', 'Matter Description'])  # Adjusted columns
         
         if matters_index is not None:
             query_gpt_with_data(user_input, matters_data, matters_index, matters_vectorizer)
