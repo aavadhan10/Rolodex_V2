@@ -6,6 +6,8 @@ from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.preprocessing import normalize
 from dotenv import load_dotenv
 import os 
+# Load environment variables
+load_dotenv()
 
 # Load environment variables
 load_dotenv()
@@ -15,7 +17,7 @@ openai.api_key = st.secrets["OPENAI_API_KEY"]
 
 # Load and clean CSV data with specified encoding
 @st.cache_data
-def load_and_clean_data(file_path, encoding='latin1'):
+def load_and_clean_data(file_path, encoding='utf-8'):
     data = pd.read_csv(file_path, encoding=encoding)
     data.columns = data.columns.str.replace('ï»¿', '').str.replace('Ã', '').str.strip()  # Clean unusual characters and whitespace
     data = data.loc[:, ~data.columns.str.contains('^Unnamed')]  # Remove unnamed columns
@@ -37,7 +39,7 @@ def call_gpt(messages):
     response = openai.ChatCompletion.create(
         model="gpt-4",
         messages=messages,
-        max_tokens=500,
+        max_tokens=150,
         n=1,
         stop=None,
         temperature=0.5,
@@ -92,31 +94,17 @@ def query_gpt_with_data(question, matters_data, matters_index, matters_vectorize
         # Prepare the prompt for GPT-4
         context = combined_results.to_string(index=False)
         messages = [
-            {"role": "system", "content": "You are a helpful assistant. I want you to go through the CSV files and make a recommendation based on the type of case, matter, and the attorney background. Don't make any information up."},
-            {"role": "user", "content": f"Based on the following information, please make a recommendation for 1-2 lawyers:\n\n{context}\n\nRecommendation:"}
+            {"role": "system", "content": "You are a helpful assistant. I want you to go through the csv files and make a recommendation based on the type of case, matter, and the attorney background. Don't make any information up."},
+            {"role": "user", "content": f"Based on the following information, please make a recommendation:\n\n{context}\n\nRecommendation:"}
         ]
         
         # Call GPT-4 for a recommendation
         gpt_response = call_gpt(messages)
         
-        # Parse GPT-4 response to extract recommended lawyers
-        recommended_lawyers = []
-        for line in gpt_response.split('\n'):
-            if line.strip():
-                recommended_lawyers.append(line.strip())
-
-        # Add GPT-4 recommendations to the DataFrame
-        for lawyer in recommended_lawyers:
-            lawyer_details = {
-                'Attorney Name': lawyer,
-                'Work Email': 'N/A',  # You may need to adjust this based on the actual data
-                'Work Phone': 'N/A',  # You may need to adjust this based on the actual data
-                'Relevant Matters': 'Recommended by GPT-4'
-            }
-            combined_results = combined_results.append(lawyer_details, ignore_index=True)
-
-        st.write("Top 1-2 Recommended Lawyer(s) (Best Vector Match with Complete Information) and Most Relevant Case:")
+        st.write("Top 1-3 Recommended Lawyer(s) (Best Vector Match with Complete Information) and Most Relevant Case:")
         st.write(combined_results)
+        st.write("GPT-4 Recommendation:")
+        st.write(gpt_response)
 
     except Exception as e:
         st.error(f"Error querying GPT: {e}")
