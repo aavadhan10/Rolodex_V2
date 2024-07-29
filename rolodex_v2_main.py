@@ -36,7 +36,7 @@ def call_gpt(messages):
     response = openai.ChatCompletion.create(
         model="gpt-4",
         messages=messages,
-        max_tokens=200,
+        max_tokens=150,
         n=1,
         stop=None,
         temperature=0.5,
