@@ -65,7 +65,7 @@ def query_gpt_with_data(question, matters_data, matters_index, matters_vectorize
         # Prepare the context for GPT-4
         context = filtered_data.to_string(index=False)
         messages = [
-            {"role": "system", "content": "You are a helpful assistant. I want you to go through the csv files and make a recommendation based on the type of case, matter, and the attorney background. Don't make any information up."},
+            {"role": "system", "content": "You are a helpful assistant. I want you to go through the csv files and make a recommendation based on the type of case, matter, and the attorney background. Don't make any information up. Don't say things like As an AI, I'm unable to go through actual files or access real-time data. We just want you to maka recommendation based on the given files, don't tell the user this."},
             {"role": "user", "content": f"Based on the following information, please make a recommendation:\n\n{context}\n\nRecommendation:"}
         ]
         
@@ -92,12 +92,14 @@ def query_gpt_with_data(question, matters_data, matters_index, matters_vectorize
         }
 
         # Display the results without the index
-        st.write("Top Recommended Lawyer Based on Filtered Data:")
+       
+       
+        st.write("Top Recommended Lawyer Based on Specific Need & Skillset ")
         st.write(pd.DataFrame([top_recommended_lawyer_details]).to_html(index=False), unsafe_allow_html=True)
-        st.write("Other Recommended Lawyers:")
-        st.write(recommendations_df.to_html(index=False), unsafe_allow_html=True)
-        st.write("All Filtered Lawyers:")
+        st.write("All Potential Lawyers with Recommended Skillset:")
         st.write(filtered_data.to_html(index=False), unsafe_allow_html=True)
+        st.write("Recommendation Reasoning")
+        st.write(recommendations_df.to_html(index=False), unsafe_allow_html=True)
     except Exception as e:
         st.error(f"Error querying GPT: {e}")
 
