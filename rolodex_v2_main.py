@@ -7,6 +7,8 @@ from sklearn.preprocessing import normalize
 from dotenv import load_dotenv
 # Load environment variables
 load_dotenv()
+# Load environment variables
+load_dotenv()
 
 # Initialize OpenAI API using environment variable
 openai.api_key = st.secrets["OPENAI_API_KEY"]
@@ -31,36 +33,26 @@ def create_vector_db(data, columns):
     return index, vectorizer
 
 # Function to query GPT with context from vector DB
-def query_gpt_with_data(question, matters_data, users_data, matters_index, users_index, matters_vectorizer, users_vectorizer):
+def query_gpt_with_data(question, matters_data, matters_index, matters_vectorizer):
     try:
         practice_area = question.split("for")[-1].strip()
-        practice_area_vec_matters = matters_vectorizer.transform([practice_area])
-        practice_area_vec_users = users_vectorizer.transform([practice_area])
+        practice_area_vec = matters_vectorizer.transform([practice_area])
         
-        D_matters, I_matters = matters_index.search(normalize(practice_area_vec_matters).toarray(), k=5)
-        D_users, I_users = users_index.search(normalize(practice_area_vec_users).toarray(), k=5)
+        D, I = matters_index.search(normalize(practice_area_vec).toarray(), k=5)
         
-        relevant_matters_data = matters_data.iloc[I_matters[0]]
-        relevant_users_data = users_data.iloc[I_users[0]]
-
-        # Merge data based on Attorney Name
-        combined_data = relevant_matters_data.merge(relevant_users_data, left_on='Attorney', right_on='Attorney Name', how='left')
+        relevant_data = matters_data.iloc[I[0]]
 
         # Print the column names of combined_data
-       #print(combined_data.columns)  # This will print to the console or terminal
-
-        # Debugging: Display the combined data
-        st.write("Combined Data for Debugging:")
-        st.write(combined_data)
+        print(relevant_data.columns)  # This will print to the console or terminal
 
         if "contact information" in question.lower():
-            return combined_data[['Attorney', 'Work Email', 'Work Phone']].to_dict(orient='records')
+            return relevant_data[['Attorney', 'Work Email', 'Work Phone']].to_dict(orient='records')
         else:
-            prompt = f"Given the following data on top lawyers:\n{combined_data.to_string()}\nPlease provide the top lawyers for the practice area of {practice_area}."
+            prompt = f"Given the following data on top lawyers:\n{relevant_data.to_string()}\nPlease provide the top lawyers for the practice area of {practice_area}."
             response = openai.ChatCompletion.create(
                 model="gpt-4",
                 messages=[
-                    {"role": "system", "content": "You are an assistant helping to identify top lawyers. You work at Scale LLP and you're in charge of helping lawyers find other lawyers based on a skillset. You are not manipulating data, you are just looking through two csv files to make a decision. Return out your best recommendation for lawyers (2-3) with their Lawyer Name, Work Email, Work phone and Relevant Case, return this information in a table for the end user. If it's the same lawyer, don't repeat in the table (only one lawyer). If you don't have a recommendation just say data not available."},
+                    {"role": "system", "content": "You are an assistant helping to identify top lawyers. You work at Scale LLP and you're in charge of helping lawyers find other lawyers based on a skillset. You are not manipulating data, you are just looking through one csv file to make a decision. Return out your best recommendation for lawyers (2-3) with their Lawyer Name, Work Email, Work phone and Relevant Case, return this information in a table for the end user. If it's the same lawyer, don't repeat in the table (only one lawyer). If you don't have a recommendation just say data not available."},
                     {"role": "user", "content": prompt}
                 ],
                 max_tokens=150
@@ -85,15 +77,13 @@ user_input = st.text_input("Your question:", placeholder="e.g., 'Who are the top
 if user_input:
     # Load CSV data on the backend
     matters_data = load_and_clean_data('Matters.csv', encoding='latin1')  # Ensure correct file path and encoding
-    users_data = load_and_clean_data('Users.csv', encoding='latin1')      # Ensure correct file path and encoding
     
-    if not matters_data.empty and not users_data.empty:
+    if not matters_data.empty:
         # Ensure the correct column names are used
         matters_index, matters_vectorizer = create_vector_db(matters_data, ['Attorney', 'Practice Area', 'Matter Description'])  # Adjusted columns
-        users_index, users_vectorizer = create_vector_db(users_data, ['Role', 'Practice Group', 'Practice Description', 'Area of Expertise'])  # Adjusted columns
         
-        if matters_index is not None and users_index is not None:
-            answer = query_gpt_with_data(user_input, matters_data, users_data, matters_index, users_index, matters_vectorizer, users_vectorizer)
+        if matters_index is not None:
+            answer = query_gpt_with_data(user_input, matters_data, matters_index, matters_vectorizer)
             if answer:
                 display_response_in_table(answer)
             else:
