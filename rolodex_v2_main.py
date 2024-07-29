@@ -6,6 +6,7 @@ from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.preprocessing import normalize
 from dotenv import load_dotenv
 import os 
+
 # Load environment variables
 load_dotenv()
 
@@ -54,7 +55,7 @@ def query_gpt_with_data(question, matters_data, matters_index, matters_vectorize
         relevant_data = matters_data.iloc[I[0]]
 
         # Filter relevant columns for output
-        filtered_data = relevant_data[['Attorney', 'Practice Area', 'Matter Description', 'Work Email', 'Work Phone']]
+        filtered_data = relevant_data[['Attorney', 'Practice Area', 'Matter Description', 'Work Email', 'Work Phone']].drop_duplicates()
 
         # Prepare the context for GPT-4
         context = filtered_data.to_string(index=False)
@@ -76,19 +77,21 @@ def query_gpt_with_data(question, matters_data, matters_index, matters_vectorize
         # Convert recommendations into a DataFrame
         recommendations_df = pd.DataFrame(recommendations, columns=['Recommendation'])
 
-        # Extract relevant details
-        relevant_lawyer = filtered_data.iloc[0]
-        relevant_lawyer_details = {
-            'Lawyer Name': relevant_lawyer['Attorney'],
-            'Relevant Cases': f"{relevant_lawyer['Practice Area']}: {relevant_lawyer['Matter Description']}",
-            'Work Email': relevant_lawyer['Work Email'],
-            'Work Phone': relevant_lawyer['Work Phone']
+        # Extract relevant details of the top recommended lawyer
+        top_recommended_lawyer = filtered_data.iloc[0]
+        top_recommended_lawyer_details = {
+            'Lawyer Name': top_recommended_lawyer['Attorney'],
+            'Relevant Cases': f"{top_recommended_lawyer['Practice Area']}: {top_recommended_lawyer['Matter Description']}",
+            'Work Email': top_recommended_lawyer['Work Email'],
+            'Work Phone': top_recommended_lawyer['Work Phone']
         }
 
         st.write("Top Recommended Lawyer Based on Filtered Data:")
-        st.table(pd.DataFrame([relevant_lawyer_details]))
+        st.table(pd.DataFrame([top_recommended_lawyer_details]).style.hide_index())
         st.write("Other Recommended Lawyers:")
-        st.table(recommendations_df)
+        st.table(recommendations_df.style.hide_index())
+        st.write("All Filtered Lawyers:")
+        st.table(filtered_data.style.hide_index())
     except Exception as e:
         st.error(f"Error querying GPT: {e}")
 
