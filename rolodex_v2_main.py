@@ -5,7 +5,6 @@ import faiss
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.preprocessing import normalize
 from dotenv import load_dotenv
-
 # Load environment variables
 load_dotenv()
 
@@ -48,17 +47,18 @@ def query_gpt_with_data(question, matters_data, matters_index, matters_vectorize
         st.write("Filtered Data for Debugging:")
         st.write(filtered_data)
 
-        # Assume the most recommended lawyer is the first one in the filtered data
-        most_recommended_lawyer = filtered_data.iloc[0][['Attorney', 'Work Email', 'Work Phone']]
+        # Find lawyers with complete information
+        complete_lawyers = filtered_data.dropna(subset=['Attorney', 'Work Email', 'Work Phone'])
 
-        # Rename columns for better clarity
-        most_recommended_lawyer.rename({
-            'Attorney': 'Attorney Name'
-        }, inplace=True)
+        # Select 1-3 lawyers with complete information
+        most_recommended_lawyers = complete_lawyers.head(3)
 
-        # Write the most recommended lawyer data directly to Streamlit
-        st.write("Most Recommended Lawyer:")
-        st.write(most_recommended_lawyer)
+        if most_recommended_lawyers.empty:
+            st.write("No recommended lawyers found with complete information.")
+        else:
+            most_recommended_lawyers = most_recommended_lawyers.rename(columns={'Attorney': 'Attorney Name'})
+            st.write("Most Recommended Lawyer(s):")
+            st.write(most_recommended_lawyers[['Attorney Name', 'Work Email', 'Work Phone']])
 
     except Exception as e:
         st.error(f"Error querying GPT: {e}")
