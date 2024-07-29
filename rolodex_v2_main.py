@@ -56,15 +56,23 @@ def query_gpt_with_data(question, matters_data, matters_index, matters_vectorize
             st.write("No recommended lawyers found with complete information.")
         else:
             top_complete_lawyers = top_complete_lawyers.rename(columns={'Attorney': 'Attorney Name'})
+
+            # Concatenate relevant information into one column
+            top_complete_lawyers['Relevant Matters'] = top_complete_lawyers.apply(
+                lambda row: f"Practice Area: {row['Practice Area']}, Matter Description: {row['Matter Description']}",
+                axis=1
+            )
+
+            top_complete_lawyers = top_complete_lawyers[['Attorney Name', 'Work Email', 'Work Phone', 'Relevant Matters']]
+
             st.write("Top 1-3 Recommended Lawyer(s) (Best Vector Match with Complete Information):")
-            st.write(top_complete_lawyers[['Attorney Name', 'Work Email', 'Work Phone']])
+            st.write(top_complete_lawyers)
 
         # Display the most relevant case
         most_relevant_case = relevant_data.iloc[D[0].argmin()]
+        most_relevant_case_details = f"Practice Area: {most_relevant_case['Practice Area']}, Matter Description: {most_relevant_case['Matter Description']}"
         st.write("Most Relevant Case:")
-        st.write(most_relevant_case[['Practice Area', 'Matter Description']])
-        st.write("Relevant Matters:")
-        st.write(relevant_data[['Matter Description']])
+        st.write(most_relevant_case_details)
 
     except Exception as e:
         st.error(f"Error querying GPT: {e}")
