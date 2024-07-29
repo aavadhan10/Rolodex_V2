@@ -5,8 +5,7 @@ import faiss
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.preprocessing import normalize
 from dotenv import load_dotenv
-# Load environment variables
-load_dotenv()
+
 # Load environment variables
 load_dotenv()
 
@@ -42,36 +41,22 @@ def query_gpt_with_data(question, matters_data, matters_index, matters_vectorize
         
         relevant_data = matters_data.iloc[I[0]]
 
-        # Filter relevant columns for debugging
+        # Filter relevant columns for output
         filtered_data = relevant_data[['Attorney', 'Matter Description', 'Work Email', 'Work Phone']]
 
-        # Debugging: Display the filtered combined data
-        st.write("Combined Data for Debugging:")
+        # Debugging: Display the filtered data
+        st.write("Filtered Data for Debugging:")
         st.write(filtered_data)
 
-        if "contact information" in question.lower():
-            return filtered_data.to_dict(orient='records')
-        else:
-            prompt = f"Given the following data on top lawyers:\n{filtered_data.to_string()}\nPlease provide the top lawyers for the practice area of {practice_area}."
-            response = openai.ChatCompletion.create(
-                model="gpt-4",
-                messages=[
-                    {"role": "system", "content": "You are an assistant helping to identify top lawyers. You work at Scale LLP and you're in charge of helping lawyers find other lawyers based on a skillset. You are not manipulating data, you are just looking through one csv file to make a decision. Return out your best recommendation for lawyers (2-3) with their Lawyer Name, Work Email, Work phone and Relevant Case, return this information in a table for the end user. If it's the same lawyer, don't repeat in the table (only one lawyer). If you don't have a recommendation just say data not available."},
-                    {"role": "user", "content": prompt}
-                ],
-                max_tokens=150
-            )
-            return response.choices[0]['message']['content'].strip()
+        # Assume the most recommended lawyer is the first one in the filtered data
+        most_recommended_lawyer = filtered_data.iloc[0]
+
+        # Write the most recommended lawyer data directly to Streamlit
+        st.write("Most Recommended Lawyer:")
+        st.write(most_recommended_lawyer)
+
     except Exception as e:
         st.error(f"Error querying GPT: {e}")
-        return None
-
-# Function to display the response in a table format
-def display_response_in_table(response):
-    if isinstance(response, pd.DataFrame):
-        st.table(response)
-    else:
-        st.write(response)
 
 # Streamlit app layout
 st.title("Rolodex AI: Find Your Ideal Lawyer 👨‍⚖️ Utilizing Open AI GPT 4 LLM's V2 Playground Version")
