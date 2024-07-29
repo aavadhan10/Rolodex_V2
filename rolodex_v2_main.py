@@ -21,7 +21,7 @@ def load_and_clean_data(file_path, encoding='utf-8'):
     data = data.loc[:, ~data.columns.str.contains('^Unnamed')]  # Remove unnamed columns
     return data
 
-# Create vector database for a given dataframe and column
+# Create vector database for a given dataframe and columns
 @st.cache(allow_output_mutation=True)
 def create_vector_db(data, columns):
     combined_text = data[columns].fillna('').apply(lambda x: ' '.join(x.astype(str)), axis=1)
@@ -52,19 +52,10 @@ def query_gpt_with_data(question, matters_data, users_data, matters_index, users
         st.write("Combined Data for Debugging:")
         st.write(combined_data)
 
-        if "contact information" in question.lower():
-            return combined_data[['Attorney', 'Work Email', 'Work Phone']].to_dict(orient='records')
-        else:
-            prompt = f"Given the following data on top lawyers:\n{combined_data.to_string()}\nPlease provide the top lawyers for the practice area of {practice_area}."
-            response = openai.ChatCompletion.create(
-                model="gpt-4",
-                messages=[
-                    {"role": "system", "content": "You are an assistant helping to identify top lawyers. Return recommendations in a table with lawyer name, work email and work phone, and relevant cases. You can find the work email and work phone in the Users.CSV. Return that information from users.csv in that table. Before,parse through the matters csv file to make a decision about whihc lawyers are the best. Then you can match the best lawyers and return their contact information.  Run through this file for this information.. Often times the practice group may not actually reflect the actual law case so parse through all the csv files before recommending a lawyer. Make sure you go through all the information each csv and return out relevant cases from the matters csv but make sure you output the information for lawyer contact and name from users.csv. Return the lawyers work email and work phone in the users.csv file."},
-                    {"role": "user", "content": prompt}
-                ],
-                max_tokens=150
-            )
-            return response.choices[0]['message']['content'].strip()
+        output_data = combined_data[['Attorney', 'Work Email', 'Work Phone', 'Matter Description']]
+        output_data = output_data.rename(columns={'Attorney': 'Lawyer Name', 'Matter Description': 'Relevant Cases'})
+
+        return output_data.to_dict(orient='records')
     except Exception as e:
         st.error(f"Error querying GPT: {e}")
         return None
