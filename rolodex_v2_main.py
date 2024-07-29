@@ -60,7 +60,7 @@ def query_gpt_with_data(question, matters_data, matters_index, matters_vectorize
 
             if not pd.isna(best_matched_lawyer['Work Email']) and not pd.isna(best_matched_lawyer['Work Phone']):
                 best_matched_lawyer = best_matched_lawyer[['Attorney', 'Work Email', 'Work Phone']]
-                st.write("Most Recommended Lawyer (Best Vector Match):")
+                st.write("Most Recommended Lawyer + Contact Information (Best Vector Match):")
                 st.write(best_matched_lawyer)
             else:
                 most_recommended_lawyers = complete_lawyers.head(3)
@@ -72,8 +72,9 @@ def query_gpt_with_data(question, matters_data, matters_index, matters_vectorize
         st.error(f"Error querying GPT: {e}")
 
 # Streamlit app layout
-st.title("Rolodex AI: Find Your Ideal Lawyer 👨‍⚖️ Utilizing Open AI GPT 4 LLM's V2 Playground Version")
+st.title("Rolodex AI: Find Your Ideal Lawyer 👨‍⚖️ Utilizing Open AI GPT 4 LLM's V2 ")
 st.write("Ask questions about the top lawyers in a specific practice area at Scale LLP:")
+st.write("Note this is still a prototype and can make mistakes. Check important info.:")
 user_input = st.text_input("Your question:", placeholder="e.g., 'Who are the top lawyers for corporate law?'")
 
 if user_input:
