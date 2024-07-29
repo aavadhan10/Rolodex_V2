@@ -49,7 +49,12 @@ def query_gpt_with_data(question, matters_data, matters_index, matters_vectorize
         st.write(filtered_data)
 
         # Assume the most recommended lawyer is the first one in the filtered data
-        most_recommended_lawyer = filtered_data.iloc[0]
+        most_recommended_lawyer = filtered_data.iloc[0][['Attorney', 'Work Email', 'Work Phone']]
+
+        # Rename columns for better clarity
+        most_recommended_lawyer.rename({
+            'Attorney': 'Attorney Name'
+        }, inplace=True)
 
         # Write the most recommended lawyer data directly to Streamlit
         st.write("Most Recommended Lawyer:")
