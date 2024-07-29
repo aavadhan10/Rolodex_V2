@@ -6,7 +6,6 @@ from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.preprocessing import normalize
 from dotenv import load_dotenv
 
-
 # Load environment variables
 load_dotenv()
 
@@ -75,9 +74,15 @@ user_input = st.text_input("Your question:", placeholder="e.g., 'Who are the top
 if user_input:
     matters_data = load_data('Matters.csv', encoding='latin1')  # Try 'latin1' encoding if 'utf-8' fails
     users_data = load_data('Users.csv', encoding='latin1')      # Try 'latin1' encoding if 'utf-8' fails
+    
+    st.write("Matters Data Columns:", matters_data.columns.tolist())
+    st.write("Users Data Columns:", users_data.columns.tolist())
+    
     if not matters_data.empty and not users_data.empty:
-        matters_index, matters_vectorizer = create_vector_db(matters_data, 'Attorney')
-        users_index, users_vectorizer = create_vector_db(users_data, 'Attorney Name')
+        # Ensure the correct column names are used
+        matters_index, matters_vectorizer = create_vector_db(matters_data, 'Responsible Attorney')  # Adjusted column name
+        users_index, users_vectorizer = create_vector_db(users_data, 'Attorney Name')              # Adjusted column name
+        
         if matters_index is not None and users_index is not None:
             answer = query_gpt_with_data(user_input, matters_data, users_data, matters_index, users_index, matters_vectorizer, users_vectorizer)
             if answer:
