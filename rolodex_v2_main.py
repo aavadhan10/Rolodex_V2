@@ -7,6 +7,7 @@ from sklearn.preprocessing import normalize
 from dotenv import load_dotenv
 import os 
 
+
 # Load environment variables
 load_dotenv()
 
@@ -33,16 +34,16 @@ def create_vector_db(data, columns):
     return index, vectorizer
 
 # Function to call GPT-4
-def call_gpt(prompt):
-    response = openai.Completion.create(
+def call_gpt(messages):
+    response = openai.ChatCompletion.create(
         model="gpt-4",
-        prompt=prompt,
+        messages=messages,
         max_tokens=150,
         n=1,
         stop=None,
         temperature=0.5,
     )
-    return response.choices[0].text.strip()
+    return response.choices[0].message['content'].strip()
 
 # Function to query GPT with context from vector DB
 def query_gpt_with_data(question, matters_data, matters_index, matters_vectorizer):
@@ -91,10 +92,13 @@ def query_gpt_with_data(question, matters_data, matters_index, matters_vectorize
 
         # Prepare the prompt for GPT-4
         context = combined_results.to_string(index=False)
-        prompt = f"Based on the following information, please make a recommendation:\n\n{context}\n\nRecommendation:"
+        messages = [
+            {"role": "system", "content": "You are a helpful assistant."},
+            {"role": "user", "content": f"Based on the following information, please make a recommendation:\n\n{context}\n\nRecommendation:"}
+        ]
         
         # Call GPT-4 for a recommendation
-        gpt_response = call_gpt(prompt)
+        gpt_response = call_gpt(messages)
         
         st.write("Top 1-3 Recommended Lawyer(s) (Best Vector Match with Complete Information) and Most Relevant Case:")
         st.write(combined_results)
