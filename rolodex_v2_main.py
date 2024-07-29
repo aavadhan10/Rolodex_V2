@@ -67,17 +67,27 @@ def query_gpt_with_data(question, matters_data, matters_index, matters_vectorize
         gpt_response = call_gpt(messages)
 
         # Process the GPT-4 response to extract recommendations
-        recommendations = []
-        for line in gpt_response.split('\n'):
-            if line.strip():
-                recommendations.append(line.strip())
+        recommendations = gpt_response.split('\n')
+        recommendations = [rec for rec in recommendations if rec.strip()]
+
+        # Ensure no duplicates
+        recommendations = list(dict.fromkeys(recommendations))
 
         # Convert recommendations into a DataFrame
         recommendations_df = pd.DataFrame(recommendations, columns=['Recommendation'])
 
-        st.write("Top Recommended Lawyers Based on Filtered Data:")
-        st.write(filtered_data)
-        st.write("GPT-4 Recommendations:")
+        # Extract relevant details
+        relevant_lawyer = filtered_data.iloc[0]
+        relevant_lawyer_details = {
+            'Lawyer Name': relevant_lawyer['Attorney'],
+            'Relevant Cases': f"{relevant_lawyer['Practice Area']}: {relevant_lawyer['Matter Description']}",
+            'Work Email': relevant_lawyer['Work Email'],
+            'Work Phone': relevant_lawyer['Work Phone']
+        }
+
+        st.write("Top Recommended Lawyer Based on Filtered Data:")
+        st.table(pd.DataFrame([relevant_lawyer_details]))
+        st.write("Other Recommended Lawyers:")
         st.table(recommendations_df)
     except Exception as e:
         st.error(f"Error querying GPT: {e}")
