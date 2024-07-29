@@ -12,10 +12,13 @@ load_dotenv()
 # Initialize OpenAI API using environment variable
 openai.api_key = st.secrets["OPENAI_API_KEY"]
 
-# Load CSV data with specified encoding
+# Load and clean CSV data with specified encoding
 @st.cache_data
-def load_data(file_path, encoding='utf-8'):
-    return pd.read_csv(file_path, encoding=encoding)
+def load_and_clean_data(file_path, encoding='utf-8'):
+    data = pd.read_csv(file_path, encoding=encoding)
+    data.columns = data.columns.str.replace('ï»¿', '').str.strip()  # Clean unusual characters and whitespace
+    data = data.loc[:, ~data.columns.str.contains('^Unnamed')]     # Remove unnamed columns
+    return data
 
 # Create vector database for a given dataframe and column
 @st.cache(allow_output_mutation=True)
@@ -72,16 +75,16 @@ st.write("Ask questions about the top lawyers in a specific practice area at Sca
 user_input = st.text_input("Your question:", placeholder="e.g., 'Who are the top lawyers for corporate law?'")
 
 if user_input:
-    matters_data = load_data('Matters.csv', encoding='latin1')  # Try 'latin1' encoding if 'utf-8' fails
-    users_data = load_data('Users.csv', encoding='latin1')      # Try 'latin1' encoding if 'utf-8' fails
+    matters_data = load_and_clean_data('Matters.csv', encoding='latin1')  # Try 'latin1' encoding if 'utf-8' fails
+    users_data = load_and_clean_data('Users.csv', encoding='latin1')      # Try 'latin1' encoding if 'utf-8' fails
     
     st.write("Matters Data Columns:", matters_data.columns.tolist())
     st.write("Users Data Columns:", users_data.columns.tolist())
     
     if not matters_data.empty and not users_data.empty:
         # Ensure the correct column names are used
-        matters_index, matters_vectorizer = create_vector_db(matters_data, 'Responsible Attorney')  # Adjusted column name
-        users_index, users_vectorizer = create_vector_db(users_data, 'Attorney Name')              # Adjusted column name
+        matters_index, matters_vectorizer = create_vector_db(matters_data, 'Attorney')  # Adjusted column name
+        users_index, users_vectorizer = create_vector_db(users_data, 'Attorney Name')  # Adjusted column name
         
         if matters_index is not None and users_index is not None:
             answer = query_gpt_with_data(user_input, matters_data, users_data, matters_index, users_index, matters_vectorizer, users_vectorizer)
