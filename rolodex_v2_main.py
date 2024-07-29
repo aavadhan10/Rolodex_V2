@@ -42,21 +42,21 @@ def query_gpt_with_data(question, matters_data, matters_index, matters_vectorize
         
         relevant_data = matters_data.iloc[I[0]]
 
-        # Print the column names of combined_data
-        #print(relevant_data.columns)  # This will print to the console or terminal
-        
-        # Debugging: Display the combined data
+        # Filter relevant columns for debugging
+        filtered_data = relevant_data[['Attorney', 'Matter Description', 'Work Email', 'Work Phone']]
+
+        # Debugging: Display the filtered combined data
         st.write("Combined Data for Debugging:")
-        st.write(relevant_data)
-        
+        st.write(filtered_data)
+
         if "contact information" in question.lower():
-            return relevant_data[['Attorney', 'Work Email', 'Work Phone']].to_dict(orient='records')
+            return filtered_data.to_dict(orient='records')
         else:
-            prompt = f"Given the following data on top lawyers:\n{relevant_data.to_string()}\nPlease provide the top lawyers for the practice area of {practice_area}."
+            prompt = f"Given the following data on top lawyers:\n{filtered_data.to_string()}\nPlease provide the top lawyers for the practice area of {practice_area}."
             response = openai.ChatCompletion.create(
                 model="gpt-4",
                 messages=[
-                    {"role": "system", "content": "You are an assistant helping to identify top lawyers. You work at Scale LLP and you're in charge of helping lawyers find other lawyers based on a skillset. You are not manipulating data, you are just looking through one csv file to make a decision. Return out your best recommendation for lawyers (2-3) with the Attorney Name, Work Email, Work phone and Relevant Case, return this information in a table for the end user. If it's the same lawyer, don't repeat in the table (only one lawyer). If you don't have a recommendation just say data not available."},
+                    {"role": "system", "content": "You are an assistant helping to identify top lawyers. You work at Scale LLP and you're in charge of helping lawyers find other lawyers based on a skillset. You are not manipulating data, you are just looking through one csv file to make a decision. Return out your best recommendation for lawyers (2-3) with their Lawyer Name, Work Email, Work phone and Relevant Case, return this information in a table for the end user. If it's the same lawyer, don't repeat in the table (only one lawyer). If you don't have a recommendation just say data not available."},
                     {"role": "user", "content": prompt}
                 ],
                 max_tokens=150
@@ -69,7 +69,8 @@ def query_gpt_with_data(question, matters_data, matters_index, matters_vectorize
 # Function to display the response in a table format
 def display_response_in_table(response):
     if isinstance(response, list):
-        st.table(response)
+        df = pd.DataFrame(response)
+        st.table(df[['Attorney', 'Matter Description', 'Work Email', 'Work Phone']])
     else:
         st.write(response)
 
