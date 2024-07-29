@@ -9,6 +9,9 @@ import os
 # Load environment variables
 load_dotenv()
 
+# Load environment variables
+load_dotenv()
+
 # Initialize OpenAI API using environment variable
 openai.api_key = st.secrets["OPENAI_API_KEY"]
 
@@ -30,6 +33,18 @@ def create_vector_db(data, columns):
     index = faiss.IndexFlatL2(X.shape[1])
     index.add(X.toarray())
     return index, vectorizer
+
+# Function to call GPT-4
+def call_gpt(messages):
+    response = openai.ChatCompletion.create(
+        model="gpt-4",
+        messages=messages,
+        max_tokens=150,
+        n=1,
+        stop=None,
+        temperature=0.5,
+    )
+    return response.choices[0].message['content'].strip()
 
 # Function to query GPT with context from vector DB
 def query_gpt_with_data(question, matters_data, matters_index, matters_vectorizer):
@@ -76,14 +91,26 @@ def query_gpt_with_data(question, matters_data, matters_index, matters_vectorize
         else:
             combined_results = pd.DataFrame([most_relevant_case_details])
 
+        # Prepare the prompt for GPT-4
+        context = combined_results.to_string(index=False)
+        messages = [
+            {"role": "system", "content": "You are a helpful assistant."},
+            {"role": "user", "content": f"Based on the following information, please make a recommendation:\n\n{context}\n\nRecommendation:"}
+        ]
+        
+        # Call GPT-4 for a recommendation
+        gpt_response = call_gpt(messages)
+        
         st.write("Top 1-3 Recommended Lawyer(s) (Best Vector Match with Complete Information) and Most Relevant Case:")
         st.write(combined_results)
+        st.write("GPT-4 Recommendation:")
+        st.write(gpt_response)
 
     except Exception as e:
         st.error(f"Error querying GPT: {e}")
 
 # Streamlit app layout
-st.title("Rolodex AI: Find Your Ideal Lawyer 👨‍⚖️ Utilizing Open AI GPT 4 LLM's V2 Playground Version")
+st.title("Rolodex AI: Find Your Ideal Lawyer 👨‍⚖️ Utilizing Open AI GPT-4")
 st.write("Ask questions about the top lawyers in a specific practice area at Scale LLP:")
 user_input = st.text_input("Your question:", placeholder="e.g., 'Who are the top lawyers for corporate law?'")
 
