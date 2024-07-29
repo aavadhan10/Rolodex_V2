@@ -5,6 +5,7 @@ import faiss
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.preprocessing import normalize
 from dotenv import load_dotenv
+import os 
 
 # Load environment variables
 load_dotenv()
@@ -30,6 +31,18 @@ def create_vector_db(data, columns):
     index = faiss.IndexFlatL2(X.shape[1])
     index.add(X.toarray())
     return index, vectorizer
+
+# Function to call GPT-4
+def call_gpt(prompt):
+    response = openai.Completion.create(
+        engine="text-davinci-003",
+        prompt=prompt,
+        max_tokens=150,
+        n=1,
+        stop=None,
+        temperature=0.5,
+    )
+    return response.choices[0].text.strip()
 
 # Function to query GPT with context from vector DB
 def query_gpt_with_data(question, matters_data, matters_index, matters_vectorizer):
@@ -76,8 +89,17 @@ def query_gpt_with_data(question, matters_data, matters_index, matters_vectorize
         else:
             combined_results = pd.DataFrame([most_relevant_case_details])
 
+        # Prepare the prompt for GPT-4
+        context = combined_results.to_string(index=False)
+        prompt = f"Based on the following information, please make a recommendation:\n\n{context}\n\nRecommendation:"
+        
+        # Call GPT-4 for a recommendation
+        gpt_response = call_gpt(prompt)
+        
         st.write("Top 1-3 Recommended Lawyer(s) (Best Vector Match with Complete Information) and Most Relevant Case:")
         st.write(combined_results)
+        st.write("GPT-4 Recommendation:")
+        st.write(gpt_response)
 
     except Exception as e:
         st.error(f"Error querying GPT: {e}")
