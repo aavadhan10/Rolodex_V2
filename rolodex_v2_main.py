@@ -5,6 +5,7 @@ import faiss
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.preprocessing import normalize
 from dotenv import load_dotenv
+
 # Load environment variables
 load_dotenv()
 
@@ -41,7 +42,7 @@ def query_gpt_with_data(question, matters_data, matters_index, matters_vectorize
         relevant_data = matters_data.iloc[I[0]]
 
         # Filter relevant columns for output
-        filtered_data = relevant_data[['Attorney','Practice Area','Matter Description', 'Work Email', 'Work Phone']]
+        filtered_data = relevant_data[['Attorney', 'Practice Area', 'Matter Description', 'Work Email', 'Work Phone']]
 
         # Debugging: Display the filtered data
         st.write("Filtered Data for Debugging:")
