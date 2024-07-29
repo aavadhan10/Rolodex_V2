@@ -87,10 +87,6 @@ if user_input:
         matters_index, matters_vectorizer = create_vector_db(matters_data, ['Attorney', 'Practice Area', 'Matter Description'])  # Adjusted columns
         
         if matters_index is not None:
-            answer = query_gpt_with_data(user_input, matters_data, matters_index, matters_vectorizer)
-            if answer is not None:
-                display_response_in_table(answer)
-            else:
-                st.error("Failed to retrieve an answer. Please check your input.")
+            query_gpt_with_data(user_input, matters_data, matters_index, matters_vectorizer)
     else:
         st.error("Failed to load data.")
