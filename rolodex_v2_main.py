@@ -80,7 +80,7 @@ def query_gpt_with_data(question, matters_data, matters_index, matters_vectorize
         recommendations = list(dict.fromkeys(recommendations))
 
         # Convert recommendations into a DataFrame
-        recommendations_df = pd.DataFrame(recommendations, columns=['Recommendation'])
+        recommendations_df = pd.DataFrame(recommendations, columns=['Recommendation Reasoning'])
 
         # Extract relevant details of the top recommended lawyer
         top_recommended_lawyer = filtered_data.iloc[0]
