@@ -48,8 +48,8 @@ def query_gpt_with_data(question, matters_data, users_data, matters_index, users
         combined_data = relevant_matters_data.merge(relevant_users_data, left_on='Attorney', right_on='Attorney Name', how='left')
 
         # Debugging: Display the combined data
-        st.write("Combined Data for Debugging:")
-        st.write(combined_data)
+       # st.write("Combined Data for Debugging:")
+       # st.write(combined_data)
 
         if "contact information" in question.lower():
             return combined_data[['Attorney', 'Work Email', 'Work Phone']].to_dict(orient='records')
