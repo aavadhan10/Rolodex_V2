@@ -8,7 +8,6 @@ from dotenv import load_dotenv
 import os 
 
 
-
 # Load environment variables
 load_dotenv()
 
@@ -34,18 +33,6 @@ def create_vector_db(data, columns):
     index.add(X.toarray())
     return index, vectorizer
 
-# Function to call GPT-4
-def call_gpt(messages):
-    response = openai.ChatCompletion.create(
-        model="gpt-4",
-        messages=messages,
-        max_tokens=150,
-        n=1,
-        stop=None,
-        temperature=0.5,
-    )
-    return response.choices[0].message['content'].strip()
-
 # Function to query GPT with context from vector DB
 def query_gpt_with_data(question, matters_data, matters_index, matters_vectorizer):
     try:
@@ -63,54 +50,22 @@ def query_gpt_with_data(question, matters_data, matters_index, matters_vectorize
         st.write("Filtered Data for Debugging:")
         st.write(filtered_data)
 
-        # Find the most relevant case
-        most_relevant_case = relevant_data.iloc[D[0].argmin()]
-        most_relevant_case_details = {
-            'Attorney Name': most_relevant_case['Attorney'],
-            'Work Email': most_relevant_case['Work Email'],
-            'Work Phone': most_relevant_case['Work Phone'],
-            'Relevant Matters': f"Practice Area: {most_relevant_case['Practice Area']}, Matter Description: {most_relevant_case['Matter Description']}"
-        }
+        # Find the top 3 lawyers with the best vector match
+        top_matches = relevant_data.head(3)
+        top_matches = top_matches.dropna(subset=['Attorney', 'Work Email', 'Work Phone'])
 
-        # Find the top 1-3 lawyers with complete information and best vector match
-        complete_lawyers = filtered_data.dropna(subset=['Attorney', 'Work Email', 'Work Phone'])
-        top_complete_lawyers = complete_lawyers.head(3)
-
-        # Remove duplicates
-        top_complete_lawyers = top_complete_lawyers[top_complete_lawyers['Attorney'] != most_relevant_case['Attorney']]
-
-        # Add the most relevant case to the top lawyers
-        if not top_complete_lawyers.empty:
-            top_complete_lawyers = top_complete_lawyers.rename(columns={'Attorney': 'Attorney Name'})
-            top_complete_lawyers['Relevant Matters'] = top_complete_lawyers.apply(
-                lambda row: f"Practice Area: {row['Practice Area']}, Matter Description: {row['Matter Description']}",
-                axis=1
-            )
-            top_complete_lawyers = top_complete_lawyers[['Attorney Name', 'Work Email', 'Work Phone', 'Relevant Matters']]
-            combined_results = pd.DataFrame([most_relevant_case_details]).append(top_complete_lawyers, ignore_index=True)
+        if top_matches.empty:
+            st.write("No recommended lawyers found with complete information.")
         else:
-            combined_results = pd.DataFrame([most_relevant_case_details])
-
-        # Prepare the prompt for GPT-4
-        context = combined_results.to_string(index=False)
-        messages = [
-            {"role": "system", "content": "You are a helpful assistant."},
-            {"role": "user", "content": f"Based on the following information, please make a recommendation:\n\n{context}\n\nRecommendation:"}
-        ]
-        
-        # Call GPT-4 for a recommendation
-        gpt_response = call_gpt(messages)
-        
-        st.write("Top 1-3 Recommended Lawyer(s) (Best Vector Match with Complete Information) and Most Relevant Case:")
-        st.write(combined_results)
-        st.write("GPT-4 Recommendation:")
-        st.write(gpt_response)
+            top_matches = top_matches.rename(columns={'Attorney': 'Attorney Name'})
+            st.write("Top 3 Recommended Lawyer(s) (Best Vector Match):")
+            st.write(top_matches[['Attorney Name', 'Work Email', 'Work Phone']])
 
     except Exception as e:
         st.error(f"Error querying GPT: {e}")
 
 # Streamlit app layout
-st.title("Rolodex AI: Find Your Ideal Lawyer 👨‍⚖️ Utilizing Open AI GPT-4")
+st.title("Rolodex AI: Find Your Ideal Lawyer 👨‍⚖️ Utilizing Open AI GPT 4 LLM's V2 Playground Version")
 st.write("Ask questions about the top lawyers in a specific practice area at Scale LLP:")
 user_input = st.text_input("Your question:", placeholder="e.g., 'Who are the top lawyers for corporate law?'")
 
