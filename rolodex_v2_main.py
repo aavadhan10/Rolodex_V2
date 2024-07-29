@@ -48,16 +48,25 @@ def query_gpt_with_data(question, matters_data, matters_index, matters_vectorize
         st.write("Filtered Data for Debugging:")
         st.write(filtered_data)
 
-        # Find the top 3 lawyers with the best vector match
-        top_matches = relevant_data.head(3)
-        top_matches = top_matches.dropna(subset=['Attorney', 'Work Email', 'Work Phone'])
+        # Find lawyers with complete information
+        complete_lawyers = filtered_data.dropna(subset=['Attorney', 'Work Email', 'Work Phone'])
 
-        if top_matches.empty:
+        if complete_lawyers.empty:
             st.write("No recommended lawyers found with complete information.")
         else:
-            top_matches = top_matches.rename(columns={'Attorney': 'Attorney Name'})
-            st.write("Top 3 Recommended Lawyer(s) (Best Vector Match):")
-            st.write(top_matches[['Attorney Name', 'Work Email', 'Work Phone']])
+            # Select the best matched lawyer based on vector distance
+            best_match_idx = D[0].argmin()
+            best_matched_lawyer = relevant_data.iloc[best_match_idx]
+
+            if not pd.isna(best_matched_lawyer['Work Email']) and not pd.isna(best_matched_lawyer['Work Phone']):
+                best_matched_lawyer = best_matched_lawyer[['Attorney', 'Work Email', 'Work Phone']]
+                st.write("Most Recommended Lawyer (Best Vector Match):")
+                st.write(best_matched_lawyer)
+            else:
+                most_recommended_lawyers = complete_lawyers.head(3)
+                most_recommended_lawyers = most_recommended_lawyers.rename(columns={'Attorney': 'Attorney Name'})
+                st.write("Most Recommended Lawyer(s):")
+                st.write(most_recommended_lawyers[['Attorney Name', 'Work Email', 'Work Phone']])
 
     except Exception as e:
         st.error(f"Error querying GPT: {e}")
