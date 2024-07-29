@@ -103,8 +103,9 @@ def query_gpt_with_data(question, matters_data, matters_index, matters_vectorize
         st.error(f"Error querying GPT: {e}")
 
 # Streamlit app layout
-st.title("Rolodex AI: Find Your Ideal Lawyer 👨‍⚖️ Utilizing Open AI GPT-4")
+st.title("Rolodex AI: Find Your Ideal Lawyer 👨‍⚖️ Utilizing Open AI GPT-4 Version 2")
 st.write("Ask questions about the top lawyers in a specific practice area at Scale LLP:")
+st.write("Note this is a prototype and can make mistakes!:")
 user_input = st.text_input("Your question:", placeholder="e.g., 'Who are the top lawyers for corporate law?'")
 
 if user_input:
