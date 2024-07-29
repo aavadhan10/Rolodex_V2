@@ -52,7 +52,7 @@ def query_gpt_with_data(question, matters_data, users_data, matters_index, users
             response = openai.ChatCompletion.create(
                 model="gpt-4",
                 messages=[
-                    {"role": "system", "content": "You are an assistant helping to identify top lawyers. Return recommendations in a table with lawyer name, contact, practice group and relevant cases."},
+                    {"role": "system", "content": "You are an assistant helping to identify top lawyers. Return recommendations in a table with lawyer name, contact, practice group and relevant cases. Find the relevant cases from matter.csv and then also the lawyer information through users.csv before you make a recommendation. Often times the practice group may not actually reflect the actual law case so parse through all the csv files before recommending a lawyer."},
                     {"role": "user", "content": prompt}
                 ],
                 max_tokens=150
