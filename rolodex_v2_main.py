@@ -66,7 +66,7 @@ def query_gpt_with_data(question, matters_data, matters_index, matters_vectorize
                 most_recommended_lawyers = complete_lawyers.head(3)
                 most_recommended_lawyers = most_recommended_lawyers.rename(columns={'Attorney': 'Attorney Name'})
                 st.write("Most Recommended Lawyer(s):")
-                st.write(most_recommended_lawyers[['Attorney Name', 'Work Email', 'Work Phone']])
+                st.write(most_recommended_lawyers[['Attorney Name', 'Work Email', 'Work Phone', 'Relevant Cases']])
 
     except Exception as e:
         st.error(f"Error querying GPT: {e}")
