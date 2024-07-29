@@ -70,6 +70,9 @@ st.write("Ask questions about the top lawyers in a specific practice area at Sca
 user_input = st.text_input("Your question:", placeholder="e.g., 'Who are the top lawyers for corporate law?'")
 
 if user_input:
+    # Clear cache before each search
+    st.cache_data.clear()
+    
     # Load CSV data on the backend
     matters_data = load_and_clean_data('Matters.csv', encoding='latin1')  # Ensure correct file path and encoding
     
