@@ -44,35 +44,36 @@ def query_gpt_with_data(question, matters_data, matters_index, matters_vectorize
         # Filter relevant columns for output
         filtered_data = relevant_data[['Attorney', 'Practice Area', 'Matter Description', 'Work Email', 'Work Phone']]
 
-        # Debugging: Display the filtered data
-        st.write("Filtered Data for Debugging:")
-        st.write(filtered_data)
+        # Find the most relevant case
+        most_relevant_case = relevant_data.iloc[D[0].argmin()]
+        most_relevant_case_details = {
+            'Attorney Name': most_relevant_case['Attorney'],
+            'Work Email': most_relevant_case['Work Email'],
+            'Work Phone': most_relevant_case['Work Phone'],
+            'Relevant Matters': f"Practice Area: {most_relevant_case['Practice Area']}, Matter Description: {most_relevant_case['Matter Description']}"
+        }
 
         # Find the top 1-3 lawyers with complete information and best vector match
         complete_lawyers = filtered_data.dropna(subset=['Attorney', 'Work Email', 'Work Phone'])
         top_complete_lawyers = complete_lawyers.head(3)
 
-        if top_complete_lawyers.empty:
-            st.write("No recommended lawyers found with complete information.")
-        else:
-            top_complete_lawyers = top_complete_lawyers.rename(columns={'Attorney': 'Attorney Name'})
+        # Remove duplicates
+        top_complete_lawyers = top_complete_lawyers[top_complete_lawyers['Attorney'] != most_relevant_case['Attorney']]
 
-            # Concatenate relevant information into one column
+        # Add the most relevant case to the top lawyers
+        if not top_complete_lawyers.empty:
+            top_complete_lawyers = top_complete_lawyers.rename(columns={'Attorney': 'Attorney Name'})
             top_complete_lawyers['Relevant Matters'] = top_complete_lawyers.apply(
                 lambda row: f"Practice Area: {row['Practice Area']}, Matter Description: {row['Matter Description']}",
                 axis=1
             )
-
             top_complete_lawyers = top_complete_lawyers[['Attorney Name', 'Work Email', 'Work Phone', 'Relevant Matters']]
+            combined_results = pd.DataFrame([most_relevant_case_details]).append(top_complete_lawyers, ignore_index=True)
+        else:
+            combined_results = pd.DataFrame([most_relevant_case_details])
 
-            st.write("Top 1-3 Recommended Lawyer(s) (Best Vector Match with Complete Information):")
-            st.write(top_complete_lawyers)
-
-        # Display the most relevant case
-        most_relevant_case = relevant_data.iloc[D[0].argmin()]
-        most_relevant_case_details = f"Practice Area: {most_relevant_case['Practice Area']}, Matter Description: {most_relevant_case['Matter Description']}"
-        st.write("Most Relevant Case:")
-        st.write(most_relevant_case_details)
+        st.write("Top 1-3 Recommended Lawyer(s) (Best Vector Match with Complete Information) and Most Relevant Case:")
+        st.write(combined_results)
 
     except Exception as e:
         st.error(f"Error querying GPT: {e}")
