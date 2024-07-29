@@ -52,7 +52,7 @@ def query_gpt_with_data(question, matters_data, users_data, matters_index, users
             response = openai.ChatCompletion.create(
                 model="gpt-4",
                 messages=[
-                    {"role": "system", "content": "You are an assistant helping to identify top lawyers. Return recommendations in a table with lawyer name, contact and relevant cases. Find the relevant cases from matter.csv and then also the lawyer information through users.csv before you make a recommendation. Often times the practice group may not actually reflect the actual law case so parse through all the csv files before recommending a lawyer."},
+                    {"role": "system", "content": "You are an assistant helping to identify top lawyers. Return recommendations in a table with lawyer name, contact and relevant cases. Find the relevant cases from matter.csv and then also the lawyer information through users.csv before you make a recommendation. Often times the practice group may not actually reflect the actual law case so parse through all the csv files before recommending a lawyer. Make sure you go through all the information each csv and return out relevant cases from the matters csv but make sure you outout the information for lawyer contact and name from users.csv"},
                     {"role": "user", "content": prompt}
                 ],
                 max_tokens=150
@@ -82,8 +82,8 @@ if user_input:
     
     if not matters_data.empty and not users_data.empty:
         # Ensure the correct column names are used
-        matters_index, matters_vectorizer = create_vector_db(matters_data, 'Attorney')  # Adjusted column name
-        users_index, users_vectorizer = create_vector_db(users_data, 'Attorney Name')  # Adjusted column name
+        matters_index, matters_vectorizer = create_vector_db(matters_data, 'Matter Number')  # Adjusted column name
+        users_index, users_vectorizer = create_vector_db(users_data, 'Role')  # Adjusted column name
         
         if matters_index is not None and users_index is not None:
             answer = query_gpt_with_data(user_input, matters_data, users_data, matters_index, users_index, matters_vectorizer, users_vectorizer)
