@@ -7,6 +7,7 @@ from sklearn.preprocessing import normalize
 from dotenv import load_dotenv
 import os 
 
+
 # Load environment variables
 load_dotenv()
 
@@ -87,11 +88,11 @@ def query_gpt_with_data(question, matters_data, matters_index, matters_vectorize
         }
 
         st.write("Top Recommended Lawyer Based on Filtered Data:")
-        st.table(pd.DataFrame([top_recommended_lawyer_details]).style.hide_index())
+        st.table(pd.DataFrame([top_recommended_lawyer_details]).reset_index(drop=True))
         st.write("Other Recommended Lawyers:")
-        st.table(recommendations_df.style.hide_index())
+        st.table(recommendations_df.reset_index(drop=True))
         st.write("All Filtered Lawyers:")
-        st.table(filtered_data.style.hide_index())
+        st.table(filtered_data.reset_index(drop=True))
     except Exception as e:
         st.error(f"Error querying GPT: {e}")
 
