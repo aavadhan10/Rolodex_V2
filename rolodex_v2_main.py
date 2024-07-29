@@ -6,7 +6,6 @@ from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.preprocessing import normalize
 from dotenv import load_dotenv
 import os 
-
 # Load environment variables
 load_dotenv()
 
@@ -52,30 +51,22 @@ def query_gpt_with_data(question, matters_data, matters_index, matters_vectorize
         # Find lawyers with complete information
         complete_lawyers = filtered_data.dropna(subset=['Attorney', 'Work Email', 'Work Phone'])
 
-        if complete_lawyers.empty:
+        # Select 1-3 lawyers with complete information
+        most_recommended_lawyers = complete_lawyers.head(3)
+
+        if most_recommended_lawyers.empty:
             st.write("No recommended lawyers found with complete information.")
         else:
-            # Select the best matched lawyer based on vector distance
-            best_match_idx = D[0].argmin()
-            best_matched_lawyer = relevant_data.iloc[best_match_idx]
-
-            if not pd.isna(best_matched_lawyer['Work Email']) and not pd.isna(best_matched_lawyer['Work Phone']):
-                best_matched_lawyer = best_matched_lawyer[['Attorney', 'Work Email', 'Work Phone']]
-                st.write("Most Recommended Lawyer + Contact Information (Best Vector Match):")
-                st.write(best_matched_lawyer)
-            else:
-                most_recommended_lawyers = complete_lawyers.head(3)
-                most_recommended_lawyers = most_recommended_lawyers.rename(columns={'Attorney': 'Attorney Name'})
-                st.write("Most Recommended Lawyer(s):")
-                st.write(most_recommended_lawyers[['Attorney Name', 'Work Email', 'Work Phone', 'Relevant Matters']])
+            most_recommended_lawyers = most_recommended_lawyers.rename(columns={'Attorney': 'Attorney Name'})
+            st.write("Most Recommended Lawyer(s):")
+            st.write(most_recommended_lawyers[['Attorney Name', 'Work Email', 'Work Phone']])
 
     except Exception as e:
         st.error(f"Error querying GPT: {e}")
 
 # Streamlit app layout
-st.title("Rolodex AI: Find Your Ideal Lawyer 👨‍⚖️ Utilizing Open AI GPT 4 LLM's V2 ")
+st.title("Rolodex AI: Find Your Ideal Lawyer 👨‍⚖️ Utilizing Open AI GPT 4 LLM's V2 Playground Version")
 st.write("Ask questions about the top lawyers in a specific practice area at Scale LLP:")
-st.write("Note this is still a prototype and can make mistakes. Check important info.:")
 user_input = st.text_input("Your question:", placeholder="e.g., 'Who are the top lawyers for corporate law?'")
 
 if user_input:
