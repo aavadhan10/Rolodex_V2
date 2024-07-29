@@ -5,7 +5,6 @@ import faiss
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.preprocessing import normalize
 from dotenv import load_dotenv
-
 # Load environment variables
 load_dotenv()
 
@@ -47,9 +46,12 @@ def query_gpt_with_data(question, matters_data, users_data, matters_index, users
         # Merge data based on Attorney Name
         combined_data = relevant_matters_data.merge(relevant_users_data, left_on='Attorney', right_on='Attorney Name', how='left')
 
+        # Print the column names of combined_data
+       #print(combined_data.columns)  # This will print to the console or terminal
+
         # Debugging: Display the combined data
-        st.write("Combined Data for Debugging:")
-        st.write(combined_data)
+         st.write("Combined Data for Debugging:")
+         st.write(combined_data)
 
         if "contact information" in question.lower():
             return combined_data[['Attorney', 'Work Email', 'Work Phone']].to_dict(orient='records')
@@ -58,7 +60,7 @@ def query_gpt_with_data(question, matters_data, users_data, matters_index, users
             response = openai.ChatCompletion.create(
                 model="gpt-4",
                 messages=[
-                    {"role": "system", "content": "You are an assistant helping to identify top lawyers. You work at Scale LLP and you're in charge of helping lawyers find other lawyers based on a skillset. You are not manipualting data, you are just looking through two csv files to make a decision. Return out your best recommendation for lawyers (2-3) with their Lawyer Name, Work Email, Work phone and Relevant Case, return this inform,ation in a table for the end user . If it's the same lawyer, don't repeat in the table (only one lawyer). If you don't have a recommendation just say data not available. "},
+                    {"role": "system", "content": "You are an assistant helping to identify top lawyers. You work at Scale LLP and you're in charge of helping lawyers find other lawyers based on a skillset. You are not manipulating data, you are just looking through two csv files to make a decision. Return out your best recommendation for lawyers (2-3) with their Lawyer Name, Work Email, Work phone and Relevant Case, return this information in a table for the end user. If it's the same lawyer, don't repeat in the table (only one lawyer). If you don't have a recommendation just say data not available."},
                     {"role": "user", "content": prompt}
                 ],
                 max_tokens=150
@@ -81,8 +83,9 @@ st.write("Ask questions about the top lawyers in a specific practice area at Sca
 user_input = st.text_input("Your question:", placeholder="e.g., 'Who are the top lawyers for corporate law?'")
 
 if user_input:
-    matters_data = load_and_clean_data('Matters.csv', encoding='latin1')  # Try 'latin1' encoding if 'utf-8' fails
-    users_data = load_and_clean_data('Users.csv', encoding='latin1')      # Try 'latin1' encoding if 'utf-8' fails
+    # Load CSV data on the backend
+    matters_data = load_and_clean_data('Matters.csv', encoding='latin1')  # Ensure correct file path and encoding
+    users_data = load_and_clean_data('Users.csv', encoding='latin1')      # Ensure correct file path and encoding
     
     if not matters_data.empty and not users_data.empty:
         # Ensure the correct column names are used
