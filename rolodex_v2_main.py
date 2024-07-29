@@ -33,17 +33,17 @@ def create_vector_db(data, columns):
     return index, vectorizer
 
 # Function to query GPT with context from vector DB
-def query_gpt_with_data(question, matters_data, users_data, matters_index, users_index, matters_vectorizer, users_vectorizer):
+def query_gpt_with_data(question, matters_data, users_data, matters_index, users_index, matters_vectorizer, users_vectorizer, num_recommendations=3):
     try:
         practice_area = question.split("for")[-1].strip()
         practice_area_vec_matters = matters_vectorizer.transform([practice_area])
         practice_area_vec_users = users_vectorizer.transform([practice_area])
         
-        D_matters, I_matters = matters_index.search(normalize(practice_area_vec_matters).toarray(), k=5)
-        D_users, I_users = users_index.search(normalize(practice_area_vec_users).toarray(), k=5)
+        D_matters, I_matters = matters_index.search(normalize(practice_area_vec_matters).toarray(), k=num_recommendations)
+        D_users, I_users = users_index.search(normalize(practice_area_vec_users).toarray(), k=num_recommendations)
         
-        relevant_matters_data = matters_data.iloc[I_matters[0]]
-        relevant_users_data = users_data.iloc[I_users[0]]
+        relevant_matters_data = matters_data.iloc[I_matters.flatten()]
+        relevant_users_data = users_data.iloc[I_users.flatten()]
 
         # Merge data based on Attorney Name
         combined_data = relevant_matters_data.merge(relevant_users_data, left_on='Attorney', right_on='Attorney Name', how='left')
@@ -52,7 +52,7 @@ def query_gpt_with_data(question, matters_data, users_data, matters_index, users
         output_data = combined_data[['Attorney', 'Work Email', 'Work Phone', 'Matter Description']]
         output_data = output_data.rename(columns={'Attorney': 'Lawyer Name', 'Matter Description': 'Relevant Cases'})
 
-        return output_data.to_dict(orient='records')
+        return output_data.head(num_recommendations).to_dict(orient='records')
     except Exception as e:
         st.error(f"Error querying GPT: {e}")
         return None
@@ -79,7 +79,7 @@ if user_input:
         users_index, users_vectorizer = create_vector_db(users_data, ['Role', 'Practice Group', 'Practice Description', 'Area of Expertise'])  # Adjusted columns
         
         if matters_index is not None and users_index is not None:
-            answer = query_gpt_with_data(user_input, matters_data, users_data, matters_index, users_index, matters_vectorizer, users_vectorizer)
+            answer = query_gpt_with_data(user_input, matters_data, users_data, matters_index, users_index, matters_vectorizer, users_vectorizer, num_recommendations=3)
             if answer:
                 display_response_in_table(answer)
             else:
