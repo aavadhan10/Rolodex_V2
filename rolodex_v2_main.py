@@ -7,7 +7,6 @@ from sklearn.preprocessing import normalize
 from dotenv import load_dotenv
 import os 
 
-
 # Load environment variables
 load_dotenv()
 
@@ -87,12 +86,13 @@ def query_gpt_with_data(question, matters_data, matters_index, matters_vectorize
             'Work Phone': top_recommended_lawyer['Work Phone']
         }
 
+        # Display the results without the index
         st.write("Top Recommended Lawyer Based on Filtered Data:")
-        st.table(pd.DataFrame([top_recommended_lawyer_details]).reset_index(drop=True))
+        st.write(pd.DataFrame([top_recommended_lawyer_details]).to_html(index=False), unsafe_allow_html=True)
         st.write("Other Recommended Lawyers:")
-        st.table(recommendations_df.reset_index(drop=True))
+        st.write(recommendations_df.to_html(index=False), unsafe_allow_html=True)
         st.write("All Filtered Lawyers:")
-        st.table(filtered_data.reset_index(drop=True))
+        st.write(filtered_data.to_html(index=False), unsafe_allow_html=True)
     except Exception as e:
         st.error(f"Error querying GPT: {e}")
 
