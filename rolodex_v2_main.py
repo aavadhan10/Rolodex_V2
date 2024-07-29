@@ -50,8 +50,8 @@ def query_gpt_with_data(question, matters_data, users_data, matters_index, users
        #print(combined_data.columns)  # This will print to the console or terminal
 
         # Debugging: Display the combined data
-         st.write("Combined Data for Debugging:")
-         st.write(combined_data)
+        st.write("Combined Data for Debugging:")
+        st.write(combined_data)
 
         if "contact information" in question.lower():
             return combined_data[['Attorney', 'Work Email', 'Work Phone']].to_dict(orient='records')
