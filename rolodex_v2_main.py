@@ -76,7 +76,7 @@ if user_input:
     matters_data = load_data('Matters.csv', encoding='latin1')  # Try 'latin1' encoding if 'utf-8' fails
     users_data = load_data('Users.csv', encoding='latin1')      # Try 'latin1' encoding if 'utf-8' fails
     if not matters_data.empty and not users_data.empty:
-        matters_index, matters_vectorizer = create_vector_db(matters_data, 'Responsible Attorney')
+        matters_index, matters_vectorizer = create_vector_db(matters_data, 'Attorney')
         users_index, users_vectorizer = create_vector_db(users_data, 'Attorney Name')
         if matters_index is not None and users_index is not None:
             answer = query_gpt_with_data(user_input, matters_data, users_data, matters_index, users_index, matters_vectorizer, users_vectorizer)
