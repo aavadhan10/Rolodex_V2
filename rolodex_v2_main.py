@@ -67,12 +67,11 @@ def query_gpt_with_data(question, matters_data, matters_index, matters_vectorize
         return None
 
 # Function to display the response in a table format
-#def display_response_in_table(response):
-  #  if isinstance(response, pd.DataFrame):
-      #  st.table(response)
- #   else:
-    #    st.write(response)
-
+def display_response_in_table(response):
+    if isinstance(response, pd.DataFrame):
+        st.table(response)
+    else:
+        st.write(response)
 
 # Streamlit app layout
 st.title("Rolodex AI: Find Your Ideal Lawyer 👨‍⚖️ Utilizing Open AI GPT 4 LLM's V2 Playground Version")
