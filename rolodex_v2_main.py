@@ -58,7 +58,7 @@ def query_gpt_with_data(question, matters_data, users_data, matters_index, users
             response = openai.ChatCompletion.create(
                 model="gpt-4",
                 messages=[
-                    {"role": "system", "content": "You are an assistant helping to identify top lawyers. You work at Scale LLP and you're in charge of helping lawyers find other lawyers based on a skillset. You are not manipualting data, you are just looking through two csv files to make a decision. Return out your best recommendation for lawyers (2-3) with their Lawyer Name, Work Email, Work phone and Relevant Case, return this inform,ation in a table for the end user . If you don't have a recommendation just say data not available. "},
+                    {"role": "system", "content": "You are an assistant helping to identify top lawyers. You work at Scale LLP and you're in charge of helping lawyers find other lawyers based on a skillset. You are not manipualting data, you are just looking through two csv files to make a decision. Return out your best recommendation for lawyers (2-3) with their Lawyer Name, Work Email, Work phone and Relevant Case, return this inform,ation in a table for the end user . If it's the same lawyer, don't repeat in the table (only one lawyer). If you don't have a recommendation just say data not available. "},
                     {"role": "user", "content": prompt}
                 ],
                 max_tokens=150
