@@ -6,22 +6,23 @@ from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.preprocessing import normalize
 from dotenv import load_dotenv
 
+
 # Load environment variables
 load_dotenv()
 
 # Initialize OpenAI API using environment variable
 openai.api_key = st.secrets["OPENAI_API_KEY"]
 
-# Load CSV data
+# Load CSV data with specified encoding
 @st.cache_data
-def load_data(file_path):
-    return pd.read_csv(file_path)
+def load_data(file_path, encoding='utf-8'):
+    return pd.read_csv(file_path, encoding=encoding)
 
 # Create vector database for a given dataframe and column
 @st.cache(allow_output_mutation=True)
 def create_vector_db(data, column):
     vectorizer = TfidfVectorizer()
-    X = vectorizer.fit_transform(data[column].astype(str))  # Use relevant data column
+    X = vectorizer.fit_transform(data[column].astype(str))
     X = normalize(X)
     index = faiss.IndexFlatL2(X.shape[1])
     index.add(X.toarray())
@@ -72,8 +73,8 @@ st.write("Ask questions about the top lawyers in a specific practice area at Sca
 user_input = st.text_input("Your question:", placeholder="e.g., 'Who are the top lawyers for corporate law?'")
 
 if user_input:
-    matters_data = load_data('Matters.csv')
-    users_data = load_data('Users.csv')
+    matters_data = load_data('Matters.csv', encoding='latin1')  # Try 'latin1' encoding if 'utf-8' fails
+    users_data = load_data('Users.csv', encoding='latin1')      # Try 'latin1' encoding if 'utf-8' fails
     if not matters_data.empty and not users_data.empty:
         matters_index, matters_vectorizer = create_vector_db(matters_data, 'Responsible Attorney')
         users_index, users_vectorizer = create_vector_db(users_data, 'Attorney Name')
