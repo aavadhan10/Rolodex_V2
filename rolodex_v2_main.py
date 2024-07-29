@@ -60,8 +60,8 @@ def query_gpt_with_data(question, matters_data, matters_index, matters_vectorize
         filtered_data = relevant_data[['Attorney', 'Practice Area', 'Matter Description', 'Work Email', 'Work Phone']]
 
         # Debugging: Display the filtered data
-        #st.write("Filtered Data for Debugging:")
-        #st.write(filtered_data)
+        st.write("Filtered Data for Debugging:")
+        st.write(filtered_data)
 
         # Find the most relevant case
         most_relevant_case = relevant_data.iloc[D[0].argmin()]
@@ -103,8 +103,8 @@ def query_gpt_with_data(question, matters_data, matters_index, matters_vectorize
         
         st.write("Top 1-3 Recommended Lawyer(s) (Best Vector Match with Complete Information) and Most Relevant Case:")
         st.write(combined_results)
-        st.write("GPT-4 Recommendation:")
-        st.write(gpt_response)
+       # st.write("GPT-4 Recommendation:")
+        #st.write(gpt_response)
 
     except Exception as e:
         st.error(f"Error querying GPT: {e}")
