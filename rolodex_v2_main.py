@@ -6,7 +6,6 @@ from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.preprocessing import normalize
 from dotenv import load_dotenv
 import os 
-
 # Load environment variables
 load_dotenv()
 
@@ -56,6 +55,12 @@ def query_gpt_with_data(question, matters_data, matters_index, matters_vectorize
 
         # Filter relevant columns for output
         filtered_data = relevant_data[['Attorney', 'Practice Area', 'Matter Description', 'Work Email', 'Work Phone']].drop_duplicates()
+        
+        # Remove rows with NaN in the 'Attorney' column
+        filtered_data = filtered_data.dropna(subset=['Attorney'])
+        
+        # Remove duplicate attorney names
+        filtered_data = filtered_data.drop_duplicates(subset=['Attorney'])
 
         # Prepare the context for GPT-4
         context = filtered_data.to_string(index=False)
@@ -87,12 +92,12 @@ def query_gpt_with_data(question, matters_data, matters_index, matters_vectorize
         }
 
         # Display the results without the index
-        st.write("Top Recommended Lawyer Based on Specific Need & Data:")
+        st.write("Top Recommended Lawyer Based on Filtered Data:")
         st.write(pd.DataFrame([top_recommended_lawyer_details]).to_html(index=False), unsafe_allow_html=True)
-        st.write("Top Recommended Lawyers across Practice Area: :")
-        st.write(filtered_data.to_html(index=False), unsafe_allow_html=True)
-        st.write("Reasoning Behind Recommendations:")
+        st.write("Other Recommended Lawyers:")
         st.write(recommendations_df.to_html(index=False), unsafe_allow_html=True)
+        st.write("All Filtered Lawyers:")
+        st.write(filtered_data.to_html(index=False), unsafe_allow_html=True)
     except Exception as e:
         st.error(f"Error querying GPT: {e}")
 
