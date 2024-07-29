@@ -35,7 +35,7 @@ def create_vector_db(data, columns):
 # Function to call GPT-4
 def call_gpt(prompt):
     response = openai.Completion.create(
-        engine="text-davinci-003",
+        model="gpt-4",
         prompt=prompt,
         max_tokens=150,
         n=1,
@@ -105,7 +105,7 @@ def query_gpt_with_data(question, matters_data, matters_index, matters_vectorize
         st.error(f"Error querying GPT: {e}")
 
 # Streamlit app layout
-st.title("Rolodex AI: Find Your Ideal Lawyer 👨‍⚖️ Utilizing Open AI GPT 4 LLM's V2 Playground Version")
+st.title("Rolodex AI: Find Your Ideal Lawyer 👨‍⚖️ Utilizing Open AI GPT-4")
 st.write("Ask questions about the top lawyers in a specific practice area at Scale LLP:")
 user_input = st.text_input("Your question:", placeholder="e.g., 'Who are the top lawyers for corporate law?'")
 
