@@ -72,8 +72,8 @@ st.write("Ask questions about the top lawyers in a specific practice area at Sca
 user_input = st.text_input("Your question:", placeholder="e.g., 'Who are the top lawyers for corporate law?'")
 
 if user_input:
-    matters_data = load_data('matters.csv')
-    users_data = load_data('users.csv')
+    matters_data = load_data('Matters.csv')
+    users_data = load_data('Users.csv')
     if not matters_data.empty and not users_data.empty:
         matters_index, matters_vectorizer = create_vector_db(matters_data, 'Responsible Attorney')
         users_index, users_vectorizer = create_vector_db(users_data, 'Attorney Name')
