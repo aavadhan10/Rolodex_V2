@@ -43,8 +43,12 @@ def query_gpt_with_data(question, matters_data, matters_index, matters_vectorize
         relevant_data = matters_data.iloc[I[0]]
 
         # Print the column names of combined_data
-        print(relevant_data.columns)  # This will print to the console or terminal
-
+        #print(relevant_data.columns)  # This will print to the console or terminal
+        
+        # Debugging: Display the combined data
+        st.write("Combined Data for Debugging:")
+        st.write(relevant_data)
+        
         if "contact information" in question.lower():
             return relevant_data[['Attorney', 'Work Email', 'Work Phone']].to_dict(orient='records')
         else:
