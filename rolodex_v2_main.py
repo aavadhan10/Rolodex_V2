@@ -25,7 +25,7 @@ def load_and_clean_data(file_path, encoding='latin1'):
 @st.cache(allow_output_mutation=True)
 def create_vector_db(data, columns):
     combined_text = data[columns].fillna('').apply(lambda x: ' '.join(x.astype(str)), axis=1)
-    vectorizer = TfidfVectorizer()
+    vectorizer = TfidfVectorizer(stop_words='english', max_features=5000)
     X = vectorizer.fit_transform(combined_text)
     X = normalize(X)
     index = faiss.IndexFlatL2(X.shape[1])
@@ -47,11 +47,12 @@ def call_gpt(messages):
 # Function to query GPT with context from vector DB
 def query_gpt_with_data(question, matters_data, matters_index, matters_vectorizer):
     try:
-        # Vectorize the input question
+        # Preprocess the input question to extract key terms
+        question = ' '.join(question.split()[-3:])  # Consider the last three words in the query
         question_vec = matters_vectorizer.transform([question])
         
         # Search for the most relevant entries
-        D, I = matters_index.search(normalize(question_vec).toarray(), k=5)
+        D, I = matters_index.search(normalize(question_vec).toarray(), k=10)  # Increase k to 10
         
         if I.size == 0 or (I == -1).all():
             st.write("No relevant entries found. Please try asking a different question.")
@@ -120,13 +121,8 @@ if user_input:
     st.cache_data.clear()
     
     # Load CSV data on the backend
-    matters_data = load_and_clean_data('Cleaned_Matters_Data.csv', encoding='latin1')  # Ensure correct file path and encoding
+    matters_data = load_and_clean_data('cleaned_matters_data.csv', encoding='latin1')  # Ensure correct file path and encoding
     
     if not matters_data.empty:
         # Ensure the correct column names are used
-        matters_index, matters_vectorizer = create_vector_db(matters_data, ['Attorney', 'Matter Description'])  # Adjusted columns
-        
-        if matters_index is not None:
-            query_gpt_with_data(user_input, matters_data, matters_index, matters_vectorizer)
-    else:
-        st.error("Failed to load data.")
+        matters_index
