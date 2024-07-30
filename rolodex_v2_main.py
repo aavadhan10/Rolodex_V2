@@ -63,6 +63,11 @@ def query_gpt_with_data(question, matters_data, matters_index, matters_vectorize
         # Remove duplicate attorney names
         filtered_data = filtered_data.drop_duplicates(subset=['Attorney'])
 
+        # Check if filtered_data is empty
+        if filtered_data.empty:
+            st.error("No relevant data found.")
+            return
+
         # Prepare the context for GPT-4
         context = filtered_data.to_string(index=False)
         messages = [
@@ -105,7 +110,7 @@ def query_gpt_with_data(question, matters_data, matters_index, matters_vectorize
 # Streamlit app layout
 st.title("Rolodex AI: Find Your Ideal Lawyer 👨‍⚖️ Utilizing Open AI GPT-4 Version 2")
 st.write("Ask questions about the top lawyers in a specific practice area at Scale LLP:")
-st.write("Note this is a prototype and can make mistakes!:")
+st.write("Note this is a prototype and can make mistakes!")
 user_input = st.text_input("Your question:", placeholder="e.g., 'Who are the top lawyers for corporate law?'")
 
 if user_input:
@@ -117,7 +122,7 @@ if user_input:
     
     if not matters_data.empty:
         # Ensure the correct column names are used
-        matters_index, matters_vectorizer = create_vector_db(matters_data, ['Attorney', 'Matter Description'])  # Adjusted columns
+        matters_index, matters_vectorizer = create_vector_db(matters_data, ['Practice Area', 'Matter Description', 'Attorney'])  # Adjusted columns
         
         if matters_index is not None:
             query_gpt_with_data(user_input, matters_data, matters_index, matters_vectorizer)
