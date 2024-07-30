@@ -52,6 +52,10 @@ def query_gpt_with_data(question, matters_data, matters_index, matters_vectorize
         # Search for the most relevant entries
         D, I = matters_index.search(normalize(question_vec).toarray(), k=5)
         
+        if I.size == 0 or (I == -1).all():
+            st.write("No relevant entries found. Please try asking a different question.")
+            return
+        
         relevant_data = matters_data.iloc[I[0]]
 
         # Filter relevant columns for output
@@ -59,6 +63,10 @@ def query_gpt_with_data(question, matters_data, matters_index, matters_vectorize
         
         # Remove rows with NaN in the 'Attorney' column
         filtered_data = filtered_data.dropna(subset=['Attorney'])
+        
+        if filtered_data.empty:
+            st.write("No relevant data found for the specified criteria.")
+            return
         
         # Remove duplicate attorney names
         filtered_data = filtered_data.drop_duplicates(subset=['Attorney'])
@@ -105,7 +113,7 @@ def query_gpt_with_data(question, matters_data, matters_index, matters_vectorize
 # Streamlit app layout
 st.title("Rolodex AI: Find Your Ideal Lawyer 👨‍⚖️ Utilizing Open AI GPT-4 Version 2")
 st.write("Ask questions about the top lawyers in a specific practice area at Scale LLP:")
-st.write("Note this is a prototype and can make mistakes!:")
+st.write("Note this is a prototype and can make mistakes!")
 user_input = st.text_input("Your question:", placeholder="e.g., 'Who are the top lawyers for corporate law?'")
 
 if user_input:
