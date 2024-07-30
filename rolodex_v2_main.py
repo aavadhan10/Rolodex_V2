@@ -101,8 +101,8 @@ def query_gpt_with_data(question, matters_data, matters_index, matters_vectorize
         }
 
         # Display the results without the index
-        st.write("Top Recommended Lawyer Based on Specific Need & Skillset:")
-        st.write(pd.DataFrame([top_recommended_lawyer_details]).to_html(index=False), unsafe_allow_html=True)
+        #st.write("Top Recommended Lawyer Based on Specific Need & Skillset:")
+        #st.write(pd.DataFrame([top_recommended_lawyer_details]).to_html(index=False), unsafe_allow_html=True)
         st.write("All Potential Lawyers with Recommended Skillset:")
         st.write(filtered_data.to_html(index=False), unsafe_allow_html=True)
         st.write("Recommendation Reasoning:")
