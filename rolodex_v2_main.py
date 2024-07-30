@@ -74,7 +74,7 @@ def query_gpt_with_data(question, matters_data, matters_index, matters_vectorize
         # Prepare the context for GPT-4
         context = filtered_data.to_string(index=False)
         messages = [
-            {"role": "system", "content": "You are a helpful assistant. I want you to go through the csv files and make a recommendation based on the type of case, matter, and the attorney background. Don't make any information up. Don't say things like 'As an AI, I'm unable to go through actual files or access real-time data.' We just want you to make a recommendation based on the given files. Assume you are the CEO of this law firm and you are confident in your recommendation even without certain information. For the recommendation you can even cite cases that the attorney has worked on for your recommendation. I want you to look through matters.csv when making a recommendation so you can see the lawyers' case history. Utilize the users prompt when giving a recommendation."},
+            {"role": "system", "content": "You are a helpful assistant. I want you to go through the csv files and make a recommendation based on the type of case, matter, and the attorney background. Don't make any information up. Don't say things like 'As an AI, I'm unable to go through actual files or access real-time data.' We just want you to make a recommendation based on the given files. Assume you are the CEO of this law firm and you are confident in your recommendation even without certain information. For the recommendation you can even cite cases that the attorney has worked on for your recommendation. I want you to look through Matters_Updated.csv when making a recommendation so you can see the lawyers' case history. Utilize the users prompt when giving a recommendation."},
             {"role": "user", "content": f"Based on the following information, please make a recommendation:\n\n{context}\n\nRecommendation:"}
         ]
         
@@ -121,7 +121,7 @@ if user_input:
     st.cache_data.clear()
     
     # Load CSV data on the backend
-    matters_data = load_and_clean_data('Matters.csv', encoding='latin1')  # Ensure correct file path and encoding
+    matters_data = load_and_clean_data('Matters_Updated.csv', encoding='latin1')  # Ensure correct file path and encoding
     
     if not matters_data.empty:
         # Ensure the correct column names are used
