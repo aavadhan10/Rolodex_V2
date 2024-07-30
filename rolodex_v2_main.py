@@ -14,7 +14,7 @@ openai.api_key = st.secrets["OPENAI_API_KEY"]
 
 # Load and clean CSV data with specified encoding
 @st.cache_data
-def load_and_clean_data(file_path, encoding='utf-8'):
+def load_and_clean_data(file_path, encoding='latin1'):
     data = pd.read_csv(file_path, encoding=encoding)
     data.columns = data.columns.str.replace('ï»¿', '').str.replace('Ã', '').str.strip()  # Clean unusual characters and whitespace
     data = data.loc[:, ~data.columns.str.contains('^Unnamed')]  # Remove unnamed columns
@@ -101,8 +101,6 @@ def query_gpt_with_data(question, matters_data, matters_index, matters_vectorize
         }
 
         # Display the results without the index
-        #st.write("Top Recommended Lawyer Based on Specific Need & Skillset:")
-        #st.write(pd.DataFrame([top_recommended_lawyer_details]).to_html(index=False), unsafe_allow_html=True)
         st.write("All Potential Lawyers with Recommended Skillset:")
         st.write(filtered_data.to_html(index=False), unsafe_allow_html=True)
         st.write("Recommendation Reasoning:")
@@ -121,7 +119,7 @@ if user_input:
     st.cache_data.clear()
     
     # Load CSV data on the backend
-    matters_data = load_and_clean_data('Matters_Updated.csv', encoding='latin1')  # Ensure correct file path and encoding
+    matters_data = load_and_clean_data(file_path, encoding='latin1')  # Ensure correct file path and encoding
     
     if not matters_data.empty:
         # Ensure the correct column names are used
