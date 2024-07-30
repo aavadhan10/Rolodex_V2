@@ -6,7 +6,6 @@ from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.preprocessing import normalize
 from dotenv import load_dotenv
 import os 
-
 # Load environment variables
 load_dotenv()
 
@@ -121,8 +120,13 @@ if user_input:
     st.cache_data.clear()
     
     # Load CSV data on the backend
-    matters_data = load_and_clean_data('Cleaned_Matters_Data.csv', encoding='latin1')  # Ensure correct file path and encoding
+    matters_data = load_and_clean_data('cleaned_matters_data.csv', encoding='latin1')  # Ensure correct file path and encoding
     
     if not matters_data.empty:
         # Ensure the correct column names are used
-        matters_index
+        matters_index, matters_vectorizer = create_vector_db(matters_data, ['Attorney', 'Matter Description'])  # Adjusted columns
+        
+        if matters_index is not None:
+            query_gpt_with_data(user_input, matters_data, matters_index, matters_vectorizer)
+    else:
+        st.error("Failed to load data.")
