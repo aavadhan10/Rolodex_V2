@@ -120,7 +120,7 @@ if user_input:
     st.cache_data.clear()
     
     # Load CSV data on the backend
-    matters_data = load_and_clean_data('cleaned_matters_data.csv', encoding='latin1')  # Ensure correct file path and encoding
+    matters_data = load_and_clean_data('Cleaned_Matters_Data.csv', encoding='latin1')  # Ensure correct file path and encoding
     
     if not matters_data.empty:
         # Ensure the correct column names are used
