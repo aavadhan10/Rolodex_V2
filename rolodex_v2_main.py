@@ -150,3 +150,21 @@ if user_input:
             query_gpt_with_data(user_input, matters_data, matters_index, matters_vectorizer)
     else:
         st.error("Failed to load data.")
+
+    # Accuracy feedback section
+    st.write("### How accurate was this result?")
+    accuracy_options = ["Accurate", "Not Accurate", "Type your own feedback"]
+    accuracy_choice = st.radio("Please select one:", accuracy_options)
+
+    # If user chooses to type their own feedback, display a text input field
+    if accuracy_choice == "Type your own feedback":
+        custom_feedback = st.text_input("Please provide your feedback:")
+    else:
+        custom_feedback = accuracy_choice
+
+    # Optionally, save or process this feedback
+    if st.button("Submit Feedback"):
+        if custom_feedback:
+            st.write(f"Thank you for your feedback: '{custom_feedback}'")
+        else:
+            st.error("Please provide feedback before submitting.")
