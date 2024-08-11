@@ -6,6 +6,7 @@ from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.preprocessing import normalize
 from dotenv import load_dotenv
 import os 
+
 # Load environment variables
 load_dotenv()
 
@@ -113,7 +114,21 @@ def query_gpt_with_data(question, matters_data, matters_index, matters_vectorize
 st.title("Rolodex AI: Find Your Ideal Lawyer 👨‍⚖️ Utilizing Open AI GPT-4 Version 2")
 st.write("Ask questions about the top lawyers in a specific practice area at Scale LLP:")
 st.write("Note this is a prototype and can make mistakes!")
-user_input = st.text_input("Your question:", placeholder="e.g., 'Who are the top lawyers for corporate law?'")
+
+# Default questions as chiclets
+default_questions = [
+    "Who are the top lawyers for corporate law?",
+    "Which attorneys have the most experience with intellectual property?",
+    "Can you recommend a lawyer specializing in employment law?",
+    "Who are the best litigators for complex cases?",
+    "Which lawyer should I contact for real estate matters?"
+]
+
+# Display the chiclets
+question = st.radio("Or choose a predefined question:", default_questions)
+
+# User can type their own question or choose one of the default ones
+user_input = st.text_input("Your question:", value=question)
 
 if user_input:
     # Clear cache before each search
