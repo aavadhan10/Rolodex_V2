@@ -115,20 +115,25 @@ st.title("Rolodex AI: Find Your Ideal Lawyer 👨‍⚖️ Utilizing Open AI GPT
 st.write("Ask questions about the top lawyers in a specific practice area at Scale LLP:")
 st.write("Note this is a prototype and can make mistakes!")
 
-# Default questions as chiclets
-default_questions = [
-    "Who are the top lawyers for corporate law?",
-    "Which attorneys have the most experience with intellectual property?",
-    "Can you recommend a lawyer specializing in employment law?",
-    "Who are the best litigators for complex cases?",
-    "Which lawyer should I contact for real estate matters?"
-]
+# Default questions as buttons
+default_questions = {
+    "Who are the top lawyers for corporate law?": "corporate law",
+    "Which attorneys have the most experience with intellectual property?": "intellectual property",
+    "Can you recommend a lawyer specializing in employment law?": "employment law",
+    "Who are the best litigators for complex cases?": "complex cases",
+    "Which lawyer should I contact for real estate matters?": "real estate"
+}
 
-# Display the chiclets
-question = st.radio("Or choose a predefined question:", default_questions)
+# Check if a default question button is clicked
+user_input = ""
+for question_text, question_value in default_questions.items():
+    if st.button(question_text):
+        user_input = question_text
+        break
 
-# User can type their own question or choose one of the default ones
-user_input = st.text_input("Your question:", value=question)
+# Also allow users to input custom questions
+if not user_input:
+    user_input = st.text_input("Or type your own question:", placeholder="e.g., 'Who are the top lawyers for corporate law?'")
 
 if user_input:
     # Clear cache before each search
