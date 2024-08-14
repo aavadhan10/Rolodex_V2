@@ -7,6 +7,7 @@ from sklearn.preprocessing import normalize
 from dotenv import load_dotenv
 import os 
 
+
 # Load environment variables
 load_dotenv()
 
@@ -57,14 +58,11 @@ def query_gpt_with_data(question, matters_data, matters_index, matters_vectorize
         relevant_data = matters_data.iloc[I[0]] if I.size > 0 and not (I == -1).all() else matters_data.head(1)
         
         # Filter relevant columns for output
-        filtered_data = relevant_data[['Attorney', 'Practice Area', 'Matter Description', 'Work Email', 'Work Phone']].drop_duplicates()
+        filtered_data = relevant_data[['Attorney', 'Practice Area', 'Matter Description', 'Work Email', 'Work Phone']].drop_duplicates(subset=['Attorney'])
         
         # Ensure there is at least one lawyer to recommend
-        filtered_data = filtered_data.dropna(subset=['Attorney'])
-        
-        # If no specific matches found, use the first lawyer in the dataset
         if filtered_data.empty:
-            filtered_data = matters_data[['Attorney', 'Practice Area', 'Matter Description', 'Work Email', 'Work Phone']].dropna(subset=['Attorney']).head(1)
+            filtered_data = matters_data[['Attorney', 'Practice Area', 'Matter Description', 'Work Email', 'Work Phone']].dropna(subset=['Attorney']).drop_duplicates(subset=['Attorney']).head(1)
 
         # Prepare the context for GPT-4
         context = filtered_data.to_string(index=False)
@@ -86,20 +84,21 @@ def query_gpt_with_data(question, matters_data, matters_index, matters_vectorize
         # Convert recommendations into a DataFrame
         recommendations_df = pd.DataFrame(recommendations, columns=['Recommendation Reasoning'])
 
-        # Extract relevant details of the top recommended lawyer
-        top_recommended_lawyer = filtered_data.iloc[0]
-        top_recommended_lawyer_details = {
-            'Lawyer Name': top_recommended_lawyer['Attorney'],
-            'Relevant Cases': f"{top_recommended_lawyer['Practice Area']}: {top_recommended_lawyer['Matter Description']}",
-            'Work Email': top_recommended_lawyer['Work Email'],
-            'Work Phone': top_recommended_lawyer['Work Phone']
-        }
+        # Extract relevant details of the top recommended lawyers
+        top_recommended_lawyers = filtered_data.drop_duplicates(subset=['Attorney'])
 
-        # Display the results without the index
+        # Display the main table without the index
         st.write("All Potential Lawyers with Recommended Skillset:")
-        st.write(filtered_data.to_html(index=False), unsafe_allow_html=True)
+        st.write(top_recommended_lawyers.to_html(index=False), unsafe_allow_html=True)
         st.write("Recommendation Reasoning:")
         st.write(recommendations_df.to_html(index=False), unsafe_allow_html=True)
+
+        # Create and display another table listing all matters for each attorney
+        for lawyer in top_recommended_lawyers['Attorney'].unique():
+            st.write(f"**{lawyer}'s Matters:**")
+            lawyer_matters = matters_data[matter_data['Attorney'] == lawyer][['Practice Area', 'Matter Description']]
+            st.write(lawyer_matters.to_html(index=False), unsafe_allow_html=True)
+
     except Exception as e:
         st.error(f"Error querying GPT: {e}")
 
