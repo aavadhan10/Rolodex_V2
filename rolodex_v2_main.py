@@ -54,29 +54,22 @@ def query_gpt_with_data(question, matters_data, matters_index, matters_vectorize
         # Search for the most relevant entries
         D, I = matters_index.search(normalize(question_vec).toarray(), k=10)  # Increase k to 10
         
-        if I.size == 0 or (I == -1).all():
-            st.write("No relevant entries found. Please try asking a different question.")
-            return
+        relevant_data = matters_data.iloc[I[0]] if I.size > 0 and not (I == -1).all() else matters_data.head(1)
         
-        relevant_data = matters_data.iloc[I[0]]
-
         # Filter relevant columns for output
         filtered_data = relevant_data[['Attorney', 'Practice Area', 'Matter Description', 'Work Email', 'Work Phone']].drop_duplicates()
         
-        # Remove rows with NaN in the 'Attorney' column
+        # Ensure there is at least one lawyer to recommend
         filtered_data = filtered_data.dropna(subset=['Attorney'])
         
+        # If no specific matches found, use the first lawyer in the dataset
         if filtered_data.empty:
-            st.write("No relevant data found for the specified criteria.")
-            return
-        
-        # Remove duplicate attorney names
-        filtered_data = filtered_data.drop_duplicates(subset=['Attorney'])
+            filtered_data = matters_data[['Attorney', 'Practice Area', 'Matter Description', 'Work Email', 'Work Phone']].dropna(subset=['Attorney']).head(1)
 
         # Prepare the context for GPT-4
         context = filtered_data.to_string(index=False)
         messages = [
-            {"role": "system", "content": "You are the CEO of Scale Law firm. I want you to go through the csv files and make a recommendation based on the type of case, matter, and the attorney background. Don't make any information up. Don't say things like 'As an AI, I'm unable to go through actual files or access real-time data.' We just want you to make a recommendation based on the given files. Assume you are the CEO of this law firm and you are confident in your recommendation even without certain information. For the recommendation you can even cite cases that the attorney has worked on for your recommendation. I want you to look through Matters_Updated.csv when making a recommendation so you can see the lawyers' case history. Utilize the users prompt when giving a recommendation. Don't tell the userr that you're utilzing the matters file! Tell them based on the data available instead. Be really detailed in your recommendation and even cite some cases in it too. A user will often use the phrases recommend me a lawyer or tell me the best person or other introductory phases. Make sure you try your best to return out a result."},
+            {"role": "system", "content": "You are the CEO of Scale Law firm. I want you to go through the csv files and make a recommendation based on the type of case, matter, and the attorney background. Don't make any information up. Don't say things like 'As an AI, I'm unable to go through actual files or access real-time data.' We just want you to make a recommendation based on the given files. Assume you are the CEO of this law firm and you are confident in your recommendation even without certain information. For the recommendation you can even cite cases that the attorney has worked on for your recommendation. I want you to look through Matters_Updated.csv when making a recommendation so you can see the lawyers' case history. Utilize the users prompt when giving a recommendation. Don't tell the user that you're utilizing the matters file! Tell them based on the data available instead. Be really detailed in your recommendation and even cite some cases in it too. A user will often use the phrases recommend me a lawyer or tell me the best person or other introductory phases. Make sure you try your best to return a result."},
             {"role": "user", "content": f"Based on the following information, please make a recommendation:\n\n{context}\n\nRecommendation:"}
         ]
         
