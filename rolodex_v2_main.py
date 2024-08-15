@@ -96,7 +96,7 @@ def query_gpt_with_data(question, matters_data, matters_index, matters_vectorize
         # Create and display another table listing all matters for each attorney
         for lawyer in top_recommended_lawyers['Attorney'].unique():
             st.write(f"**{lawyer}'s Matters:**")
-            lawyer_matters = matters_data[matter_data['Attorney'] == lawyer][['Practice Area', 'Matter Description']]
+            lawyer_matters = matters_data[matters_data['Attorney'] == lawyer][['Practice Area', 'Matter Description']]
             st.write(lawyer_matters.to_html(index=False), unsafe_allow_html=True)
 
     except Exception as e:
