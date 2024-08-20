@@ -1,3 +1,5 @@
+
+Copy code
 import openai
 import streamlit as st
 import pandas as pd
@@ -20,6 +22,10 @@ def load_and_clean_data(file_path, encoding='latin1'):
     data = pd.read_csv(file_path, encoding=encoding)
     data.columns = data.columns.str.replace('ï»¿', '').str.replace('Ã', '').str.strip()  # Clean unusual characters and whitespace
     data = data.loc[:, ~data.columns.str.contains('^Unnamed')]  # Remove unnamed columns
+    
+    # Print available columns for troubleshooting
+    st.write("Available columns in dataset:", data.columns.tolist())
+    
     return data
 
 # Create vector database for a given dataframe and columns
@@ -57,12 +63,12 @@ def query_gpt_with_data(question, matters_data, matters_index, matters_vectorize
         
         relevant_data = matters_data.iloc[I[0]] if I.size > 0 and not (I == -1).all() else matters_data.head(1)
         
-        # Filter relevant columns for output (Exclude 'Work Phone' and use 'role detail' as 'Role')
-        filtered_data = relevant_data[['Attorney', 'Practice Area', 'Matter Description', 'Work Email', 'role detail']].rename(columns={'role detail': 'Role'}).drop_duplicates(subset=['Attorney'])
+        # Filter relevant columns for output (using 'Role Detail' and renaming it to 'Role')
+        filtered_data = relevant_data[['Attorney', 'Practice Area', 'Matter Description', 'Work Email', 'Role Detail']].rename(columns={'Role Detail': 'Role'}).drop_duplicates(subset=['Attorney'])
         
         # Ensure there is at least one lawyer to recommend
         if filtered_data.empty:
-            filtered_data = matters_data[['Attorney', 'Practice Area', 'Matter Description', 'Work Email', 'role detail']].rename(columns={'role detail': 'Role'}).dropna(subset=['Attorney']).drop_duplicates(subset=['Attorney']).head(1)
+            filtered_data = matters_data[['Attorney', 'Practice Area', 'Matter Description', 'Work Email', 'Role Detail']].rename(columns={'Role Detail': 'Role'}).dropna(subset=['Attorney']).drop_duplicates(subset=['Attorney']).head(1)
 
         # Prepare the context for GPT-4
         context = filtered_data.to_string(index=False)
@@ -160,4 +166,3 @@ if user_input:
             st.write(f"Thank you for your feedback: '{custom_feedback}'")
         else:
             st.error("Please provide feedback before submitting.")
-
