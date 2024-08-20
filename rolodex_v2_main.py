@@ -23,7 +23,7 @@ def load_and_clean_data(file_path, encoding='latin1'):
     data = data.loc[:, ~data.columns.str.contains('^Unnamed')]  # Remove unnamed columns
     
     # Print available columns for troubleshooting
-    st.write("Available columns in dataset:", data.columns.tolist())
+    #st.write("Available columns in dataset:", data.columns.tolist())
     
     return data
 
