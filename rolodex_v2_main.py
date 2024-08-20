@@ -117,7 +117,7 @@ default_questions = {
     "Who are the top lawyers for corporate law?": "corporate law",
     "Which attorneys have the most experience with intellectual property?": "intellectual property",
     "Can you recommend a lawyer specializing in employment law?": "employment law",
-    "Who are the best litigators for complex cases?": "complex cases",
+    "Who are the best litigators for financial cases?": "financial law",
     "Which lawyer should I contact for real estate matters?": "real estate"
 }
 
