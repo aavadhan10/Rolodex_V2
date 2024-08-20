@@ -57,12 +57,12 @@ def query_gpt_with_data(question, matters_data, matters_index, matters_vectorize
         
         relevant_data = matters_data.iloc[I[0]] if I.size > 0 and not (I == -1).all() else matters_data.head(1)
         
-        # Filter relevant columns for output
-        filtered_data = relevant_data[['Attorney', 'Practice Area', 'Matter Description', 'Work Email', 'Work Phone']].drop_duplicates(subset=['Attorney'])
+        # Filter relevant columns for output (Exclude 'Work Phone' and include 'Role')
+        filtered_data = relevant_data[['Attorney', 'Practice Area', 'Matter Description', 'Work Email', 'Role']].drop_duplicates(subset=['Attorney'])
         
         # Ensure there is at least one lawyer to recommend
         if filtered_data.empty:
-            filtered_data = matters_data[['Attorney', 'Practice Area', 'Matter Description', 'Work Email', 'Work Phone']].dropna(subset=['Attorney']).drop_duplicates(subset=['Attorney']).head(1)
+            filtered_data = matters_data[['Attorney', 'Practice Area', 'Matter Description', 'Work Email', 'Role']].dropna(subset=['Attorney']).drop_duplicates(subset=['Attorney']).head(1)
 
         # Prepare the context for GPT-4
         context = filtered_data.to_string(index=False)
