@@ -46,7 +46,7 @@ def call_gpt(messages):
         max_tokens=150,
         n=1,
         stop=None,
-        temperature=0.5,
+        temperature=0.9,
     )
     return response.choices[0]['message']['content'].strip()
 
